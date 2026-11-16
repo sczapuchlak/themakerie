@@ -192,6 +192,21 @@ export async function getPattern(id: string) {
 
   const sourceRows = sources.data ?? [];
   const projectRows = projects.data ?? [];
+  // Tracked time per project (finished sessions; corrections replace timer time).
+  const tracked = new Map<string, { seconds: number; sessions: number }>();
+  if (projectRows.length) {
+    const { data: sessionRows } = await supabase
+      .from("project_sessions")
+      .select("project_id, duration_seconds, status")
+      .in("project_id", projectRows.map((p) => p.id))
+      .eq("status", "finished");
+    for (const row of sessionRows ?? []) {
+      const t = tracked.get(row.project_id) ?? { seconds: 0, sessions: 0 };
+      t.seconds += row.duration_seconds ?? 0;
+      t.sessions += 1;
+      tracked.set(row.project_id, t);
+    }
+  }
   const urls = await signPaths(supabase, [
     pattern.data.cover_path,
     ...sourceRows.map((s) => s.storage_path),
@@ -206,7 +221,12 @@ export async function getPattern(id: string) {
       ...section,
       steps: (steps.data ?? []).filter((s) => s.section_id === section.id),
     })),
-    projects: projectRows.map((p) => ({ ...p, coverUrl: urls.get(p.cover_path ?? "") ?? null })),
+    projects: projectRows.map((p) => ({
+      ...p,
+      coverUrl: urls.get(p.cover_path ?? "") ?? null,
+      trackedSeconds: tracked.get(p.id)?.seconds ?? 0,
+      sessionCount: tracked.get(p.id)?.sessions ?? 0,
+    })),
   };
 }
 export type PatternDetail = Awaited<ReturnType<typeof getPattern>>;

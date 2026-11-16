@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CoverArt } from "@/components/library/cover-art";
-import { DeleteProject, Photos, ProjectDetails, ProjectTracker, Sessions, StepChecklist } from "@/components/library/project-panel";
+import { DeleteProject, Photos, ProjectDetails, ProjectTracker } from "@/components/library/project-panel";
+import { Journal, ProjectInsights } from "@/components/workspace/journal";
 import { StatusPill } from "@/components/library/status-pill";
 import { getProject } from "@/lib/library/data";
+import { buildSnapshot, workspaceClient } from "@/lib/workspace/server";
 
 export const metadata: Metadata = { title: "Project" };
 
 export default async function ProjectPage({ params }: PageProps<"/projects/[projectId]">) {
   const { projectId } = await params;
-  const { project, coverUrl, pattern, photos, sessions, sources, sections } = await getProject(projectId);
+  const { project, coverUrl, pattern, photos, sources } = await getProject(projectId);
+  const { supabase } = await workspaceClient();
+  const snapshot = (await buildSnapshot(supabase, projectId))!;
   const pdf = sources.find((s) => s.kind === "pdf" && s.fileUrl);
   const otherLinks = sources.filter((s) => s.kind === "website" || s.kind === "video");
 
@@ -51,8 +55,11 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
             </p>
           )}
           <div className="relative mt-5 flex flex-wrap gap-3">
+            <Link href={`/projects/${project.id}/work`} className="btn btn-primary" data-testid="open-work-mode">
+              Open Work Mode
+            </Link>
             {pdf?.fileUrl && (
-              <a href={pdf.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+              <a href={pdf.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
                 Open pattern PDF
               </a>
             )}
@@ -68,8 +75,8 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
       <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1.1fr]">
         <div className="space-y-4">
           <ProjectTracker project={project} />
-          <StepChecklist projectId={project.id} sections={sections} />
-          <Sessions projectId={project.id} sessions={sessions} />
+          <ProjectInsights snapshot={snapshot} />
+          <Journal snapshot={snapshot} />
         </div>
         <div className="space-y-4">
           <ProjectDetails project={project} />
@@ -77,7 +84,6 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
         </div>
       </div>
 
-      <p className="mt-6 text-xs text-muted">Counters, a timer and the pattern reader arrive with the Crafting Workspace.</p>
       <div className="mt-4 border-t border-line pt-4">
         <DeleteProject project={project} />
       </div>

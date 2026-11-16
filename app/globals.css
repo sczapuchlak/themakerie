@@ -110,6 +110,31 @@
   --sidebar-w: 4.75rem;
 }
 
+/* Light paper surfaces inside midnight regions (e.g. sheets in Work Mode). */
+@utility tone-paper {
+  color-scheme: light;
+  color: var(--text-body);
+
+  --text-strong: #081638;
+  --text-body: #26305a;
+  --text-muted: #4a5380;
+
+  --line: rgb(8 22 56 / 0.12);
+  --line-strong: rgb(8 22 56 / 0.28);
+  --control: #ffffff;
+  --selected: rgb(8 22 56 / 0.08);
+
+  --accent: #494af4;
+  --vivid: #cf2fa5;
+  --spark: #494af4;
+  --focus: #081638;
+
+  --iris-1: #3536d8;
+  --iris-2: #c01f97;
+  --iris-3: #b1501c;
+  --iris-4: #0d7aa3;
+}
+
 /* -- Semantic tokens: midnight regions ------------------------------------ */
 @utility tone-midnight {
   color-scheme: dark;

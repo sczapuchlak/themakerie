@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { ServiceWorker } from "@/components/pwa/service-worker";
 import { Atmosphere } from "@/components/shell/atmosphere";
 import { SIDEBAR_STORAGE_KEY } from "@/lib/navigation";
 import "./globals.css";
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <Atmosphere />
+        <ServiceWorker />
         {children}
       </body>
     </html>

@@ -65,7 +65,7 @@ export function InProgress({ projects }: { projects: ActiveProject[] }) {
                   {p.pattern && <p className="truncate text-xs text-muted">{p.pattern.title}</p>}
                   <Progress value={p.progress} className="mt-3" />
                   <Link
-                    href={`/projects/${p.id}`}
+                    href={`/projects/${p.id}/work`}
                     className="btn btn-ink mt-auto self-start !min-h-10 !px-4"
                     aria-label={`Continue ${p.name}`}
                   >

@@ -604,11 +604,14 @@ export async function logSession(input: { projectId: string; minutes: number; no
   const minutes = Math.round(Number(input.minutes));
   if (!Number.isFinite(minutes) || minutes < 1 || minutes > 1440) return fail("Enter between 1 and 1440 minutes.");
   const date = dateOnly(input.date);
+  const start = date ? new Date(`${date}T12:00:00Z`) : new Date(Date.now() - minutes * 60_000);
   const { error } = await supabase.from("project_sessions").insert({
     project_id: input.projectId,
-    duration_minutes: minutes,
+    active_seconds: minutes * 60,
     note: text(input.note, 1000),
-    started_at: date ? new Date(`${date}T12:00:00Z`).toISOString() : new Date().toISOString(),
+    started_at: start.toISOString(),
+    ended_at: new Date(start.getTime() + minutes * 60_000).toISOString(),
+    status: "finished",
   });
   if (error) return fail("Couldn't log the session.");
   refresh();

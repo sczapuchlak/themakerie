@@ -73,10 +73,10 @@ select is((select count(*)::int from public.pattern_overview), 1, 'the pattern a
 select is((select array[project_count, active_count, finished_count] from public.pattern_overview),
   array[3, 1, 1], 'overview summarizes project activity');
 
-insert into public.project_sessions (project_id, duration_minutes, started_at)
-  values ('30000000-0000-4000-8000-000000000001', 45, '2026-11-01 10:00+00');
+insert into public.project_sessions (project_id, active_seconds, started_at, ended_at)
+  values ('30000000-0000-4000-8000-000000000001', 2700, '2026-11-01 10:00+00', '2026-11-01 10:45+00');
 select is((select last_worked_at from public.projects where id = '30000000-0000-4000-8000-000000000001'),
-  '2026-11-01 10:00+00'::timestamptz, 'logging a session updates last worked');
+  '2026-11-01 10:45+00'::timestamptz, 'logging a session updates last worked');
 
 update public.projects set progress = 50 where id = '30000000-0000-4000-8000-000000000001';
 select is((select updated_at = created_at from public.patterns where id = '20000000-0000-4000-8000-000000000001'),

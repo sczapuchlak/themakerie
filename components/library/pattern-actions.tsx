@@ -238,7 +238,7 @@ export function ContinueChooser({ projects }: { projects: { id: string; name: st
         <ul className="space-y-2">
           {projects.map((p) => (
             <li key={p.id}>
-              <Link href={`/projects/${p.id}`} className="flex min-h-14 items-center justify-between gap-4 rounded-tile border border-line bg-white px-4">
+              <Link href={`/projects/${p.id}/work`} className="flex min-h-14 items-center justify-between gap-4 rounded-tile border border-line bg-white px-4">
                 <span className="font-semibold text-strong">{p.name}</span>
                 <span className="text-sm text-muted">
                   {statusLabel(p.status)}

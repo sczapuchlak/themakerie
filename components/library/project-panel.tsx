@@ -58,23 +58,33 @@ export function ProjectTracker({ project }: { project: P }) {
           </button>
         ))}
       </div>
-      <label className="mt-6 block">
-        <span className="flex items-baseline justify-between">
-          <span className="eyebrow">Progress</span>
-          <span className="font-mono text-lg font-semibold text-strong">{progress}%</span>
-        </span>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          step={1}
-          value={progress}
-          onChange={(e) => setProgress(Number(e.target.value))}
-          onPointerUp={() => run(() => updateProject({ id: project.id, progress }))}
-          onKeyUp={(e) => ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) && run(() => updateProject({ id: project.id, progress }))}
-          className="mt-3 h-10 w-full accent-[#081638]"
-        />
-      </label>
+      {project.progress_method === "manual" ? (
+        <label className="mt-6 block">
+          <span className="flex items-baseline justify-between">
+            <span className="eyebrow">Progress</span>
+            <span className="font-mono text-lg font-semibold text-strong">{progress}%</span>
+          </span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={progress}
+            onChange={(e) => setProgress(Number(e.target.value))}
+            onPointerUp={() => run(() => updateProject({ id: project.id, progress }))}
+            onKeyUp={(e) => ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) && run(() => updateProject({ id: project.id, progress }))}
+            className="mt-3 h-10 w-full accent-[#081638]"
+          />
+        </label>
+      ) : (
+        <p className="mt-6 text-sm text-body">
+          Progress <strong className="font-mono text-strong">{project.progress ?? 0}%</strong>, tracked by {project.progress_method}. Change how it&rsquo;s measured in{" "}
+          <a href={`/projects/${project.id}/work`} className="font-semibold text-accent underline">
+            Work Mode → Progress
+          </a>
+          .
+        </p>
+      )}
       <div className="mt-2 min-h-5">
         <Note m={message} />
       </div>
@@ -196,7 +206,7 @@ export function Sessions({ projectId, sessions }: { projectId: string; sessions:
   const [date, setDate] = useState(() => todayLocal());
   const [note, setNote] = useState("");
   const { pending, message, run } = useSaver();
-  const total = sessions.reduce((n, s) => n + s.duration_minutes, 0);
+  const total = Math.round(sessions.reduce((n, s) => n + (s.duration_seconds ?? 0), 0) / 60);
   return (
     <section aria-labelledby="sessions" className="surface-panel rounded-card p-5 sm:p-6">
       <div className="flex items-baseline justify-between">
@@ -237,7 +247,7 @@ export function Sessions({ projectId, sessions }: { projectId: string; sessions:
           {sessions.map((s) => (
             <li key={s.id} className="flex items-center gap-3 py-2 text-sm">
               <span className="w-20 shrink-0 font-mono text-muted">{new Date(s.started_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-              <span className="w-16 shrink-0 font-semibold text-strong">{s.duration_minutes} min</span>
+              <span className="w-16 shrink-0 font-semibold text-strong">{Math.round((s.duration_seconds ?? 0) / 60)} min</span>
               <span className="min-w-0 flex-1 truncate text-body">{s.note}</span>
               <button type="button" aria-label="Delete session" className="grid size-9 place-items-center rounded-full text-muted hover:bg-selected" onClick={() => run(() => deleteSession(s.id), "Removed")}>
                 ×

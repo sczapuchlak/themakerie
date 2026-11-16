@@ -37,7 +37,7 @@ export function Sheet({
         if (e.target === ref.current) onClose();
       }}
       aria-label={title}
-      className="m-0 mt-auto max-h-[88dvh] w-full max-w-none overflow-hidden rounded-t-panel bg-paper p-0 text-body shadow-2xl backdrop:bg-midnight/50 backdrop:backdrop-blur-sm sm:m-auto sm:max-w-lg sm:rounded-panel"
+      className="tone-paper m-0 mt-auto max-h-[88dvh] w-full max-w-none overflow-hidden rounded-t-panel bg-paper p-0 text-body shadow-2xl backdrop:bg-midnight/50 backdrop:backdrop-blur-sm sm:m-auto sm:max-w-lg sm:rounded-panel"
     >
       {open && (
         <div className="flex max-h-[88dvh] flex-col">

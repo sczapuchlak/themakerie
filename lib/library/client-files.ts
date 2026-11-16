@@ -72,10 +72,18 @@ export async function toCoverJpeg(source: Blob | HTMLCanvasElement, max = 1200):
  * Reads page count and renders page 1 of a PDF (PDF.js, loaded on demand).
  * Fails soft: a PDF that can't be read is still uploaded and saved.
  */
+/** URL of the bundled PDF.js worker (also cached for offline use). */
+export const pdfWorkerSrc = () => new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+
+export async function loadPdfjs() {
+  const pdfjs = await import("pdfjs-dist");
+  pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerSrc();
+  return pdfjs;
+}
+
 export async function inspectPdf(file: Blob): Promise<{ pageCount: number | null; firstPage: HTMLCanvasElement | null }> {
   try {
-    const pdfjs = await import("pdfjs-dist");
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+    const pdfjs = await loadPdfjs();
     const task = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
     const doc = await task.promise;
     const pageCount = doc.numPages;

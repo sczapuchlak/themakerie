@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { compareProjects, formatDuration } from "@/lib/workspace/model";
 import { CoverArt } from "@/components/library/cover-art";
 import { ArchivePattern, ContinueChooser, DeletePattern, FavoriteToggle, MovePattern, StartProject } from "@/components/library/pattern-actions";
 import { Progress } from "@/components/library/library-landing";
@@ -76,7 +77,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
           )}
           <div className="relative mt-6 flex flex-wrap gap-3">
             {active.length === 1 && (
-              <Link href={`/projects/${active[0].id}`} className="btn btn-primary">
+              <Link href={`/projects/${active[0].id}/work`} className="btn btn-primary">
                 Continue {active[0].name}
               </Link>
             )}
@@ -129,6 +130,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
                     <Progress value={pr.progress} className="mt-2" />
                     <p className="text-xs text-muted">
                       {pr.last_worked_at ? `Last worked ${new Date(pr.last_worked_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : "Not worked on yet"}
+                      {pr.sessionCount > 0 && ` · ${formatDuration(pr.trackedSeconds)} tracked`}
                     </p>
                   </div>
                 </Link>
@@ -137,6 +139,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
           </ul>
         )}
       </section>
+      <ProjectComparison projects={projects} />
 
       {/* 5: structured instructions */}
       <section id="instructions" aria-labelledby="instructions-title" className="mt-10 scroll-mt-6">
@@ -293,5 +296,42 @@ function TextBlock({ label, text }: { label: string; text: string }) {
       <p className="eyebrow">{label}</p>
       <p className="mt-1 text-sm whitespace-pre-line text-body">{text}</p>
     </div>
+  );
+}
+
+function ProjectComparison({ projects }: { projects: { id: string; name: string; status: string; trackedSeconds: number; sessionCount: number }[] }) {
+  const withTime = projects.filter((p) => p.sessionCount > 0);
+  if (withTime.length < 2) return null;
+  const cmp = compareProjects(projects.map((p) => ({ id: p.id, name: p.name, status: p.status, trackedSeconds: p.trackedSeconds, sessions: p.sessionCount })));
+  const max = Math.max(...withTime.map((p) => p.trackedSeconds));
+  return (
+    <section aria-labelledby="compare" className="surface-panel mt-4 rounded-card p-5 sm:p-6" data-testid="project-comparison">
+      <h2 id="compare" className="eyebrow">
+        Comparing your makes · tracked time
+      </h2>
+      <ul className="mt-3 space-y-2">
+        {withTime.map((p) => (
+          <li key={p.id} className="grid grid-cols-[minmax(0,10rem)_1fr_auto] items-center gap-3 text-sm">
+            <span className="truncate font-semibold text-strong">{p.name}</span>
+            <span className="h-2 overflow-hidden rounded-full bg-selected">
+              <span className="block h-full rounded-full bg-cobalt" style={{ width: `${(p.trackedSeconds / max) * 100}%` }} />
+            </span>
+            <span className="font-mono text-strong">
+              {formatDuration(p.trackedSeconds)}
+              {p.status !== "finished" && <span className="ml-1 text-xs text-muted">so far</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {cmp.difference !== null && cmp.fastest && cmp.slowest ? (
+        <p className="mt-3 text-sm text-body">
+          <strong className="text-strong">{cmp.fastest.name}</strong> took {formatDuration(cmp.difference)} less tracked work than{" "}
+          <strong className="text-strong">{cmp.slowest.name}</strong>.
+        </p>
+      ) : (
+        <p className="mt-3 text-sm text-muted">A direct comparison appears once at least two finished projects have tracked sessions.</p>
+      )}
+      <p className="mt-2 text-xs text-muted">Only timed sessions count; untimed work isn&rsquo;t included, so differences may not reflect all the effort.</p>
+    </section>
   );
 }

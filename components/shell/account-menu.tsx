@@ -1,5 +1,5 @@
-import { signOut } from "@/app/auth/actions";
 import { getAccess } from "@/lib/auth/dal";
+import { SignOutForm } from "./sign-out-form";
 
 /**
  * Signed-in owner + sign out. Reads the session, so render it inside
@@ -19,7 +19,7 @@ export async function AccountMenu({ variant }: { variant: "sidebar" | "compact" 
 
   if (variant === "compact") {
     return (
-      <form action={signOut}>
+      <SignOutForm>
         <button
           type="submit"
           className="flex min-h-11 items-center gap-2 rounded-full pl-1 text-xs font-semibold text-body hover:text-strong"
@@ -27,7 +27,7 @@ export async function AccountMenu({ variant }: { variant: "sidebar" | "compact" 
           <Initials value={initials} />
           Sign out
         </button>
-      </form>
+      </SignOutForm>
     );
   }
 
@@ -36,14 +36,14 @@ export async function AccountMenu({ variant }: { variant: "sidebar" | "compact" 
       <Initials value={initials} />
       <div className="min-w-0 flex-1 sidebar-collapsed:hidden">
         <p className="truncate text-sm font-semibold text-strong">{label}</p>
-        <form action={signOut}>
+        <SignOutForm>
           <button
             type="submit"
             className="text-xs font-medium text-muted underline-offset-4 hover:text-strong hover:underline"
           >
             Sign out
           </button>
-        </form>
+        </SignOutForm>
       </div>
     </div>
   );

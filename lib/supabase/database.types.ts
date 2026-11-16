@@ -149,16 +149,158 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"project_photos": {
+                },"project_bookmarks": {
                   Row: {
-                    "created_at": string,"file_name": string | null,"id": string,"mime_type": string | null,"owner_id": string,"project_id": string,"size_bytes": number | null,"storage_path": string
+                    "created_at": string,"id": string,"label": string,"owner_id": string,"page": number,"project_id": string,"source_id": string,"y": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"file_name"?: string | null,"id"?: string,"mime_type"?: string | null,"owner_id"?: string,"project_id": string,"size_bytes"?: number | null,"storage_path": string
+                    "created_at"?: string,"id"?: string,"label": string,"owner_id"?: string,"page": number,"project_id": string,"source_id": string,"y"?: number
                   }
                   Update: {
-                    "created_at"?: string,"file_name"?: string | null,"id"?: string,"mime_type"?: string | null,"owner_id"?: string,"project_id"?: string,"size_bytes"?: number | null,"storage_path"?: string
+                    "created_at"?: string,"id"?: string,"label"?: string,"owner_id"?: string,"page"?: number,"project_id"?: string,"source_id"?: string,"y"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_bookmarks_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_bookmarks_source_id_fkey"
+      columns: ["source_id"]
+isOneToOne: false
+      referencedRelation: "pattern_sources"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_counter_events": {
+                  Row: {
+                    "amount": number,"counter_id": string,"created_at": string,"id": string,"kind": string,"owner_id": string,"project_id": string,"rolled_over": boolean,"session_id": string | null,"value_after": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"counter_id": string,"created_at"?: string,"id": string,"kind": string,"owner_id"?: string,"project_id": string,"rolled_over"?: boolean,"session_id"?: string | null,"value_after"?: number | null
+                  }
+                  Update: {
+                    "amount"?: number,"counter_id"?: string,"created_at"?: string,"id"?: string,"kind"?: string,"owner_id"?: string,"project_id"?: string,"rolled_over"?: boolean,"session_id"?: string | null,"value_after"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_counter_events_counter_id_fkey"
+      columns: ["counter_id"]
+isOneToOne: false
+      referencedRelation: "project_counters"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_counter_events_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_counter_events_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "project_sessions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_counters": {
+                  Row: {
+                    "client_updated_at": string,"created_at": string,"id": string,"is_main": boolean,"name": string,"owner_id": string,"position": number,"project_id": string,"rollover": boolean,"rollover_counter_id": string | null,"section_id": string | null,"step": number,"target": number | null,"updated_at": string,"value": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_updated_at"?: string,"created_at"?: string,"id"?: string,"is_main"?: boolean,"name": string,"owner_id"?: string,"position"?: number,"project_id": string,"rollover"?: boolean,"rollover_counter_id"?: string | null,"section_id"?: string | null,"step"?: number,"target"?: number | null,"updated_at"?: string,"value"?: number
+                  }
+                  Update: {
+                    "client_updated_at"?: string,"created_at"?: string,"id"?: string,"is_main"?: boolean,"name"?: string,"owner_id"?: string,"position"?: number,"project_id"?: string,"rollover"?: boolean,"rollover_counter_id"?: string | null,"section_id"?: string | null,"step"?: number,"target"?: number | null,"updated_at"?: string,"value"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_counters_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_counters_rollover_counter_id_fkey"
+      columns: ["rollover_counter_id"]
+isOneToOne: false
+      referencedRelation: "project_counters"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_counters_section_id_fkey"
+      columns: ["section_id"]
+isOneToOne: false
+      referencedRelation: "pattern_sections"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_milestones": {
+                  Row: {
+                    "client_updated_at": string,"created_at": string,"done_at": string | null,"id": string,"owner_id": string,"position": number,"project_id": string,"session_id": string | null,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_updated_at"?: string,"created_at"?: string,"done_at"?: string | null,"id"?: string,"owner_id"?: string,"position"?: number,"project_id": string,"session_id"?: string | null,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "client_updated_at"?: string,"created_at"?: string,"done_at"?: string | null,"id"?: string,"owner_id"?: string,"position"?: number,"project_id"?: string,"session_id"?: string | null,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_milestones_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_milestones_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "project_sessions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_notes": {
+                  Row: {
+                    "body": string,"client_updated_at": string,"created_at": string,"id": string,"kind": string,"owner_id": string,"pinned": boolean,"project_id": string,"session_id": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"client_updated_at"?: string,"created_at"?: string,"id"?: string,"kind"?: string,"owner_id"?: string,"pinned"?: boolean,"project_id": string,"session_id"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "body"?: string,"client_updated_at"?: string,"created_at"?: string,"id"?: string,"kind"?: string,"owner_id"?: string,"pinned"?: boolean,"project_id"?: string,"session_id"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_notes_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_notes_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "project_sessions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_photos": {
+                  Row: {
+                    "caption": string | null,"created_at": string,"file_name": string | null,"id": string,"mime_type": string | null,"owner_id": string,"project_id": string,"session_id": string | null,"show_in_gallery": boolean,"size_bytes": number | null,"storage_path": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "caption"?: string | null,"created_at"?: string,"file_name"?: string | null,"id"?: string,"mime_type"?: string | null,"owner_id"?: string,"project_id": string,"session_id"?: string | null,"show_in_gallery"?: boolean,"size_bytes"?: number | null,"storage_path": string
+                  }
+                  Update: {
+                    "caption"?: string | null,"created_at"?: string,"file_name"?: string | null,"id"?: string,"mime_type"?: string | null,"owner_id"?: string,"project_id"?: string,"session_id"?: string | null,"show_in_gallery"?: boolean,"size_bytes"?: number | null,"storage_path"?: string
                   }
                   Relationships: [
                     {
@@ -167,18 +309,76 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "projects"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_photos_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "project_sessions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_progress_events": {
+                  Row: {
+                    "done": number | null,"id": string,"method": string,"note": string | null,"owner_id": string,"percent": number,"project_id": string,"recorded_at": string,"session_id": string | null,"target": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "done"?: number | null,"id"?: string,"method": string,"note"?: string | null,"owner_id"?: string,"percent": number,"project_id": string,"recorded_at"?: string,"session_id"?: string | null,"target"?: number | null
+                  }
+                  Update: {
+                    "done"?: number | null,"id"?: string,"method"?: string,"note"?: string | null,"owner_id"?: string,"percent"?: number,"project_id"?: string,"recorded_at"?: string,"session_id"?: string | null,"target"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_progress_events_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_progress_events_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "project_sessions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_reader_states": {
+                  Row: {
+                    "client_updated_at": string,"fit": string,"guides": NonNullable<Json>,"owner_id": string,"page": number,"project_id": string,"scroll_left": number,"scroll_top": number,"source_id": string,"updated_at": string,"zoom": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_updated_at"?: string,"fit"?: string,"guides"?: NonNullable<Json>,"owner_id"?: string,"page"?: number,"project_id": string,"scroll_left"?: number,"scroll_top"?: number,"source_id": string,"updated_at"?: string,"zoom"?: number
+                  }
+                  Update: {
+                    "client_updated_at"?: string,"fit"?: string,"guides"?: NonNullable<Json>,"owner_id"?: string,"page"?: number,"project_id"?: string,"scroll_left"?: number,"scroll_top"?: number,"source_id"?: string,"updated_at"?: string,"zoom"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_reader_states_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_reader_states_source_id_fkey"
+      columns: ["source_id"]
+isOneToOne: false
+      referencedRelation: "pattern_sources"
+      referencedColumns: ["id"]
     }
                   ]
                 },"project_sessions": {
                   Row: {
-                    "created_at": string,"duration_minutes": number,"id": string,"note": string | null,"owner_id": string,"project_id": string,"started_at": string
+                    "accomplished": string | null,"active_seconds": number,"adjusted_seconds": number | null,"client_updated_at": string,"created_at": string,"duration_minutes": number | null,"duration_seconds": number | null,"ended_at": string | null,"id": string,"note": string | null,"owner_id": string,"progress_after": number | null,"progress_before": number | null,"project_id": string,"resumed_at": string | null,"started_at": string,"status": string,"units_after": number | null,"units_before": number | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"duration_minutes": number,"id"?: string,"note"?: string | null,"owner_id"?: string,"project_id": string,"started_at"?: string
+                    "accomplished"?: string | null,"active_seconds"?: number,"adjusted_seconds"?: number | null,"client_updated_at"?: string,"created_at"?: string,"duration_minutes"?: number | null,"duration_seconds"?: never,"ended_at"?: string | null,"id"?: string,"note"?: string | null,"owner_id"?: string,"progress_after"?: number | null,"progress_before"?: number | null,"project_id": string,"resumed_at"?: string | null,"started_at"?: string,"status"?: string,"units_after"?: number | null,"units_before"?: number | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"duration_minutes"?: number,"id"?: string,"note"?: string | null,"owner_id"?: string,"project_id"?: string,"started_at"?: string
+                    "accomplished"?: string | null,"active_seconds"?: number,"adjusted_seconds"?: number | null,"client_updated_at"?: string,"created_at"?: string,"duration_minutes"?: number | null,"duration_seconds"?: never,"ended_at"?: string | null,"id"?: string,"note"?: string | null,"owner_id"?: string,"progress_after"?: number | null,"progress_before"?: number | null,"project_id"?: string,"resumed_at"?: string | null,"started_at"?: string,"status"?: string,"units_after"?: number | null,"units_before"?: number | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -217,14 +417,14 @@ isOneToOne: false
                   ]
                 },"projects": {
                   Row: {
-                    "cover_path": string | null,"created_at": string,"finished_on": string | null,"id": string,"last_worked_at": string | null,"name": string,"notes": string | null,"owner_id": string,"pattern_id": string | null,"progress": number | null,"size_colorway": string | null,"started_on": string | null,"status": string,"updated_at": string
+                    "client_updated_at": string,"cover_path": string | null,"created_at": string,"finished_on": string | null,"id": string,"last_worked_at": string | null,"name": string,"notes": string | null,"owner_id": string,"pattern_id": string | null,"progress": number | null,"progress_counter_id": string | null,"progress_done": number,"progress_method": string,"progress_target": number | null,"size_colorway": string | null,"started_on": string | null,"status": string,"unit_label": string | null,"updated_at": string,"workspace": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "cover_path"?: string | null,"created_at"?: string,"finished_on"?: string | null,"id"?: string,"last_worked_at"?: string | null,"name": string,"notes"?: string | null,"owner_id"?: string,"pattern_id"?: string | null,"progress"?: number | null,"size_colorway"?: string | null,"started_on"?: string | null,"status"?: string,"updated_at"?: string
+                    "client_updated_at"?: string,"cover_path"?: string | null,"created_at"?: string,"finished_on"?: string | null,"id"?: string,"last_worked_at"?: string | null,"name": string,"notes"?: string | null,"owner_id"?: string,"pattern_id"?: string | null,"progress"?: number | null,"progress_counter_id"?: string | null,"progress_done"?: number,"progress_method"?: string,"progress_target"?: number | null,"size_colorway"?: string | null,"started_on"?: string | null,"status"?: string,"unit_label"?: string | null,"updated_at"?: string,"workspace"?: NonNullable<Json>
                   }
                   Update: {
-                    "cover_path"?: string | null,"created_at"?: string,"finished_on"?: string | null,"id"?: string,"last_worked_at"?: string | null,"name"?: string,"notes"?: string | null,"owner_id"?: string,"pattern_id"?: string | null,"progress"?: number | null,"size_colorway"?: string | null,"started_on"?: string | null,"status"?: string,"updated_at"?: string
+                    "client_updated_at"?: string,"cover_path"?: string | null,"created_at"?: string,"finished_on"?: string | null,"id"?: string,"last_worked_at"?: string | null,"name"?: string,"notes"?: string | null,"owner_id"?: string,"pattern_id"?: string | null,"progress"?: number | null,"progress_counter_id"?: string | null,"progress_done"?: number,"progress_method"?: string,"progress_target"?: number | null,"size_colorway"?: string | null,"started_on"?: string | null,"status"?: string,"unit_label"?: string | null,"updated_at"?: string,"workspace"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -238,6 +438,12 @@ isOneToOne: false
       columns: ["pattern_id"]
 isOneToOne: false
       referencedRelation: "patterns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_progress_counter_id_fkey"
+      columns: ["progress_counter_id"]
+isOneToOne: false
+      referencedRelation: "project_counters"
       referencedColumns: ["id"]
     }
                   ]
@@ -293,7 +499,12 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "delete_folder":
+            "apply_counter_event":
+{ Args: { "p_amount": number,"p_at"?: string,"p_counter": string,"p_id": string,"p_kind": string,"p_session"?: string }; Returns: {
+              "r_applied": boolean,"r_counter": string,"r_rolled": number,"r_value": number
+            }[]
+                           },
+"delete_folder":
 { Args: { "target": string }; Returns: undefined
                            },
 "is_authorized_account":
