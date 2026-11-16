@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { describeStock } from "@/lib/stash/catalog";
+import { describeStock, isLowStock } from "@/lib/stash/catalog";
 import type { StashCard } from "@/lib/stash/data";
 import { SupplyArt, Swatches } from "./supply-art";
 
@@ -22,7 +22,7 @@ const subtitle = (c: StashCard) => [c.brand, c.color_code ? `#${c.color_code}` :
 
 /** Boutique card: the material is the star, the facts are quiet. */
 export function ItemCard({ c }: { c: StashCard }) {
-  const low = c.low_stock_threshold != null && (c.quantity_total ?? 0) - (c.reserved_total ?? 0) <= c.low_stock_threshold;
+  const low = isLowStock(c);
   return (
     <Link href={`/stash/${c.id}`} className="group block" data-testid="stash-card">
       <div className="card-plain lift relative overflow-hidden rounded-card p-1.5">

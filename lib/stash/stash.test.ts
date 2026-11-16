@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { colorFamilyOf, describeStock, familiesFor, fromBase, normalizeCode, toBase, totalLengthCm, totalMassDg } from "./catalog.ts";
+import { colorFamilyOf, isLowStock, describeStock, familiesFor, fromBase, normalizeCode, toBase, totalLengthCm, totalMassDg } from "./catalog.ts";
 
 const empty = { full_units: 0, partial_units: 0, has_unknown_partials: false, loose_mass_dg: 0, loose_length_cm: 0, pieces: 0, reserved_total: 0, quantity_total: 0 };
 
@@ -42,4 +42,11 @@ test("colour codes stay strings; colour families are approximate", () => {
   assert.equal(colorFamilyOf("#f7f5ef"), "white");
   assert.equal(colorFamilyOf("#ec6fb4"), "pink");
   assert.ok(familiesFor(["#d63a3a", "#3b6fe0", "#4caf50"]).includes("multi"));
+});
+
+test("low stock counts whole units only", () => {
+  assert.equal(isLowStock({ low_stock_threshold: 1, full_units: 1, partial_units: 0, reserved_units: 0 }), true);
+  assert.equal(isLowStock({ low_stock_threshold: 1, full_units: 4, partial_units: 0, reserved_units: 3 }), true, "reserved units aren't available");
+  assert.equal(isLowStock({ low_stock_threshold: 1, full_units: 3, partial_units: 0, reserved_units: 0 }), false);
+  assert.equal(isLowStock({ low_stock_threshold: null, full_units: 0, partial_units: 0, reserved_units: 0 }), false);
 });

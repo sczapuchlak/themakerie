@@ -255,3 +255,7 @@ export const formatMoney = (cents: number | null | undefined, currency = "USD") 
 
 /** Colour codes stay exact strings: "0310", "B5200", "ECRU". */
 export const normalizeCode = (code: string | null | undefined) => (code ?? "").trim().toUpperCase() || null;
+
+/** Low stock compares whole units only (never grams + skeins + cm). */
+export const isLowStock = (c: { low_stock_threshold: number | null; full_units: number | null; partial_units?: number | null; reserved_units: number | null }) =>
+  c.low_stock_threshold != null && (c.full_units ?? 0) + (c.partial_units ?? 0) - (c.reserved_units ?? 0) <= c.low_stock_threshold;

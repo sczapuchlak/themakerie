@@ -2,6 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { requireOwner } from "@/lib/auth/dal";
 import { isUuid } from "@/lib/library/constants";
+import { isLowStock } from "./catalog";
 import { signPaths } from "@/lib/library/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
@@ -93,7 +94,7 @@ export async function getStashHome() {
 
   const materials = cards.filter((c) => c.kind === "material");
   const tools = cards.filter((c) => c.kind === "tool");
-  const lowStock = cards.filter((c) => c.low_stock_threshold != null && (c.quantity_total ?? 0) - (c.reserved_total ?? 0) <= c.low_stock_threshold);
+  const lowStock = cards.filter((c) => isLowStock(c));
   const reserved = (allocations.data ?? [])
     .filter((a) => a.kind === "material" ? (a.reserved_quantity ?? 0) > 0 : true)
     .map((a) => ({ ...a, item: byId.get(a.item_id) ?? null }))
@@ -211,7 +212,7 @@ export async function browseStash(q: StashQuery) {
   const { data, error } = await query.order("id").limit(300);
   if (error) throw error;
   let rows = data ?? [];
-  if (q.low) rows = rows.filter((c) => c.low_stock_threshold != null && (c.quantity_total ?? 0) - (c.reserved_total ?? 0) <= c.low_stock_threshold);
+  if (q.low) rows = rows.filter((c) => isLowStock(c));
   return { cards: await toCards(supabase, rows, options.locations), options };
 }
 

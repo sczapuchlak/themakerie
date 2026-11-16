@@ -705,6 +705,8 @@ select
   coalesce(sum(h.quantity) filter (where h.measure = 'length'), 0)::int as loose_length_cm,
   coalesce(sum(h.quantity) filter (where h.measure = 'piece'), 0)::int as pieces,
   coalesce(sum(h.reserved), 0)::int as reserved_total,
+  -- Reserved whole units, for low-stock checks that never mix units.
+  coalesce(sum(h.reserved) filter (where h.measure = 'count'), 0)::int as reserved_units,
   coalesce(sum(h.quantity), 0)::int as quantity_total,
   (select count(*) from public.stash_lots l where l.item_id = i.id)::int as lot_count,
   (select array_agg(distinct l.location_id) filter (where l.location_id is not null) from public.stash_lots l where l.item_id = i.id) as location_ids,
