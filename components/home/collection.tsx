@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { CoverArt } from "@/components/library/cover-art";
+import type { ActiveProject, RecentPattern } from "@/lib/library/data";
+import { sinceLabel } from "@/lib/library/format";
 
 /**
  * Home collection — Active projects / Recent patterns. One calm, luminous
@@ -16,7 +19,10 @@ type CollectionProps = {
   emptyTitle: string;
   message: string;
   actionLabel: string;
+  actionHref?: "/patterns" | `/patterns/${string}`;
   variant: "projects" | "patterns";
+  projects?: ActiveProject[];
+  patterns?: RecentPattern[];
 };
 
 export function Collection({
@@ -28,9 +34,13 @@ export function Collection({
   emptyTitle,
   message,
   actionLabel,
+  actionHref,
   variant,
+  projects: projectItems = [],
+  patterns: patternItems = [],
 }: CollectionProps) {
   const projects = variant === "projects";
+  const hasItems = projects ? projectItems.length > 0 : patternItems.length > 0;
   return (
     <section
       aria-labelledby={id}
@@ -40,7 +50,7 @@ export function Collection({
     >
       <div className="relative flex items-end justify-between gap-4">
         <div className="flex min-w-0 items-end gap-2.5 sm:gap-3">
-          <span aria-hidden="true" className="numeral-outline text-[2.1rem] text-strong sm:text-[2.6rem]">
+          <span aria-hidden="true" className="iridescent-text font-display-tight text-[2.4rem] leading-none sm:text-[3rem]">
             {number}
           </span>
           <h2 id={id} className="font-display-tight text-[1.35rem] sm:text-[1.6rem]">
@@ -58,20 +68,61 @@ export function Collection({
         </Link>
       </div>
 
-      <div className="relative mt-5 flex items-center gap-5 border-t border-line pt-5">
-        <Slot kind={variant} />
-        <div className="min-w-0">
-          <p className="font-semibold text-strong">{emptyTitle}</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted">{message}</p>
-          <Link
-            href={href}
-            className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
-          >
-            {actionLabel}
-            <span aria-hidden="true">→</span>
-          </Link>
+      {hasItems ? (
+        projects ? (
+          <ul className="relative mt-5 divide-y divide-line border-t border-line" data-testid="home-projects">
+            {projectItems.slice(0, 4).map((p) => (
+              <li key={p.id}>
+                <Link href={`/projects/${p.id}/work`} className="group flex items-center gap-4 py-3.5">
+                  <span className="relative h-16 w-14 shrink-0 overflow-hidden rounded-t-full rounded-b-md ring-1 ring-line">
+                    <CoverArt url={p.coverUrl} title={p.name} craft={p.pattern?.craft} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-strong group-hover:underline">{p.name}</span>
+                    <span className="block truncate text-sm text-muted">
+                      {p.pattern?.title ?? "No pattern"}
+                      {p.last_worked_at ? ` · ${sinceLabel(p.last_worked_at)}` : ""}
+                    </span>
+                    <span className="mt-1.5 block h-1.5 max-w-[16rem] overflow-hidden rounded-full bg-midnight/10">
+                      <span className="block h-full rounded-full bg-cobalt" style={{ width: `${p.progress ?? 0}%` }} />
+                    </span>
+                  </span>
+                  <span className="hidden shrink-0 rounded-full bg-midnight px-3 py-1.5 text-xs font-semibold text-neon sm:inline">Continue →</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="relative mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4" data-testid="home-patterns">
+            {patternItems.slice(0, 4).map((p) => (
+              <li key={p.id}>
+                <Link href={`/patterns/${p.id}`} className="group block">
+                  <span className="relative block aspect-[3/4] overflow-hidden rounded-tile rounded-tr-[1.25rem] shadow-[0_12px_28px_-18px_rgb(8_22_56/0.6)] ring-1 ring-line motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1">
+                    <CoverArt url={p.coverUrl} title={p.title} craft={p.craft} />
+                    {p.favorite && <span className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-white/95 text-xs text-[#c01f97]">★</span>}
+                  </span>
+                  <span className="mt-2 line-clamp-2 text-sm leading-snug font-semibold text-strong">{p.title}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : (
+        <div className="relative mt-5 flex items-center gap-5 border-t border-line pt-5">
+          <Slot kind={variant} />
+          <div className="min-w-0">
+            <p className="font-semibold text-strong">{emptyTitle}</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted">{message}</p>
+            <Link
+              href={actionHref ?? href}
+              className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+            >
+              {actionLabel}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
     </section>
   );

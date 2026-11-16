@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { NumberedHeading } from "@/components/editorial/foil";
+import { LocalTime } from "@/components/ui/local-time";
 import { Sheet } from "@/components/ui/sheet";
 import { syncWorkspace } from "@/lib/workspace/actions";
 import { sinceLabel } from "@/lib/library/format";
@@ -10,7 +12,7 @@ import { computeInsights, computeProgress, formatDuration, NOTE_KINDS, sessionSe
 const op = <T extends Omit<Op, "opId" | "at">>(o: T) => ({ ...o, opId: crypto.randomUUID(), at: new Date().toISOString() }) as unknown as Op;
 
 /** Project journal: one entry per work session, newest first. */
-export function Journal({ snapshot }: { snapshot: Snapshot }) {
+export function Journal({ snapshot, n = 1 }: { snapshot: Snapshot; n?: number }) {
   const router = useRouter();
   const [editing, setEditing] = useState<Session | null>(null);
   const [adding, setAdding] = useState(false);
@@ -21,9 +23,9 @@ export function Journal({ snapshot }: { snapshot: Snapshot }) {
   return (
     <section aria-labelledby="journal" data-testid="journal">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 id="journal" className="font-display-tight text-[clamp(1.4rem,2.6vw,1.75rem)]">
+        <NumberedHeading n={n} id="journal" size="sm">
           Journal
-        </h2>
+        </NumberedHeading>
         <button type="button" className="btn btn-secondary press !min-h-10" onClick={() => setAdding(true)}>
           ＋ Past session
         </button>
@@ -49,13 +51,12 @@ export function Journal({ snapshot }: { snapshot: Snapshot }) {
             const notes = snapshot.notes.filter((n) => n.session_id === s.id);
             const milestones = snapshot.milestones.filter((m) => m.session_id === s.id);
             const seconds = sessionSeconds(s);
-            const d = new Date(s.started_at);
             const gained = s.progress_before !== null && s.progress_after !== null ? s.progress_after - s.progress_before : 0;
             return (
               <li key={s.id} className="relative flex gap-4">
                 <div className="relative z-10 grid w-[3.2rem] shrink-0 place-items-center self-start rounded-tile bg-white py-1.5 text-center shadow-sm ring-1 ring-line">
-                  <span className="text-[0.6rem] font-semibold tracking-[0.12em] text-muted uppercase">{d.toLocaleDateString(undefined, { month: "short" })}</span>
-                  <span className="font-display-tight text-xl leading-none text-strong">{d.getDate()}</span>
+                  <LocalTime iso={s.started_at} format={(x) => x.toLocaleDateString(undefined, { month: "short" })} className="text-[0.6rem] font-semibold tracking-[0.12em] text-muted uppercase" />
+                  <LocalTime iso={s.started_at} format={(x) => String(x.getDate())} className="font-display-tight text-xl leading-none text-strong" />
                 </div>
                 <article className="card-plain min-w-0 flex-1 rounded-card p-4">
                   <div className="flex flex-wrap items-center gap-2">
@@ -68,7 +69,7 @@ export function Journal({ snapshot }: { snapshot: Snapshot }) {
                         +{gained}% · {s.progress_before}% → {s.progress_after}%
                       </span>
                     )}
-                    <span className="text-xs text-muted">{d.toLocaleDateString(undefined, { weekday: "long" })}</span>
+                    <LocalTime iso={s.started_at} format={(x) => x.toLocaleDateString(undefined, { weekday: "long" })} className="text-xs text-muted" />
                     <button type="button" className="ml-auto min-h-9 text-sm font-semibold text-accent hover:underline" onClick={() => setEditing(s)}>
                       Edit
                     </button>
@@ -271,7 +272,7 @@ export function ProjectInsights({ snapshot }: { snapshot: Snapshot }) {
     i.totalSeconds > 0 ? ["Crafting time", formatDuration(i.totalSeconds)] : null,
     i.sessionCount > 0 ? ["Sessions", String(i.sessionCount)] : null,
     i.averageSeconds ? ["Avg. session", formatDuration(i.averageSeconds)] : null,
-    i.lastWorkedAt ? ["Last worked", sinceLabel(i.lastWorkedAt) ?? "—"] : null,
+    i.lastWorkedAt ? ["Last worked", "__since__"] : null,
     p.started_on ? ["Started", fmtDate(p.started_on)] : null,
     p.status === "finished" && p.finished_on ? ["Finished", fmtDate(p.finished_on)] : null,
   ].filter((x): x is [string, string] => Boolean(x));
@@ -279,11 +280,11 @@ export function ProjectInsights({ snapshot }: { snapshot: Snapshot }) {
   return (
     <section aria-label="Insights" className="card-plain rounded-card p-5" data-testid="insights">
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3">
-        {facts.map(([k, v]) => (
+        {facts.map(([k, v], idx) => (
           <div key={k}>
             <dt className="text-xs text-muted">{k}</dt>
-            <dd className="mt-0.5 font-semibold text-strong" data-testid={`insight-${k}`}>
-              {v}
+            <dd className={`mt-0.5 font-semibold ${idx < 3 ? "iridescent-text font-display-tight text-[1.5rem] leading-tight" : "text-strong"}`} data-testid={`insight-${k}`}>
+              {v === "__since__" && i.lastWorkedAt ? <LocalTime iso={i.lastWorkedAt} format={(x) => sinceLabel(x.toISOString()) ?? "—"} /> : v}
             </dd>
           </div>
         ))}

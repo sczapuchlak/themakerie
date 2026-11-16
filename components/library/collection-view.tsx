@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { FoilStrip, Numeral } from "@/components/editorial/foil";
 import { notFound } from "next/navigation";
 import { getCollection, getCrafts, getFolders, folderPath, type Scope } from "@/lib/library/data";
 import { parseLibraryQuery, toSearchParams } from "@/lib/library/query";
@@ -48,21 +49,30 @@ export async function CollectionView({
         </ol>
       </nav>
 
-      <header className="mt-3 flex flex-wrap items-end justify-between gap-4">
-        <div className="flex items-center gap-3">
-          {folder && <FolderGlyph color={folder.color} />}
-          <h1 className="font-display-tight text-[clamp(2.1rem,5vw,3.2rem)]">{title}</h1>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {folder && (
-            <>
-              <FolderButton folders={folders} defaultParentId={folder.id} label="＋ Sub-folder" className="btn btn-secondary !min-h-10" />
-              <FolderButton folders={folders} folder={folder} label="Folder settings" className="btn btn-secondary !min-h-10" />
-            </>
-          )}
-          <Link href={addHref} className="btn btn-ink !min-h-10">
-            ＋ Add pattern
-          </Link>
+      <header className="tone-midnight surface-midnight relative isolate mt-3 overflow-hidden rounded-panel">
+        <FoilStrip left={folder ? "Folder" : "Pattern Library"} right={folder ? (folder.parent_id ? "Nested folder" : "Your folder") : "✦ Automatic collection"} />
+        <div className="flex flex-wrap items-end justify-between gap-4 p-5 sm:p-7">
+          <div className="flex min-w-0 items-end gap-4">
+            <Numeral n={collection.total} tone="midnight" className="text-[3rem] sm:text-[3.6rem]" />
+            <div className="min-w-0 pb-1">
+              <p className="eyebrow">{collection.total === 1 ? "pattern" : "patterns"}</p>
+              <h1 className="flex items-center gap-2.5 font-display-tight text-[clamp(1.9rem,4.4vw,2.8rem)] leading-tight text-white [overflow-wrap:anywhere]">
+                {folder && <FolderGlyph color={folder.color} />}
+                {title}
+              </h1>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {folder && (
+              <>
+                <FolderButton folders={folders} defaultParentId={folder.id} label="＋ Sub-folder" className="btn btn-secondary press !min-h-10" />
+                <FolderButton folders={folders} folder={folder} label="Folder settings" className="btn btn-secondary press !min-h-10" />
+              </>
+            )}
+            <Link href={addHref} className="btn btn-primary press !min-h-10">
+              ＋ Add pattern
+            </Link>
+          </div>
         </div>
       </header>
 

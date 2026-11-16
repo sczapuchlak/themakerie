@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FoilStrip } from "@/components/editorial/foil";
 import { Sheet } from "@/components/ui/sheet";
 import { toCoverJpeg, uploadFile } from "@/lib/library/client-files";
 import { validateUpload } from "@/lib/library/constants";
@@ -76,7 +77,7 @@ export function TimerControl({ ws, open, onFinish }: { ws: Workspace; open: Sess
       <span className="flex items-center gap-1.5 pr-1 pl-2.5">
         <span className={`size-2 rounded-full ${running ? "bg-neon motion-safe:animate-pulse" : "bg-peach"}`} aria-hidden="true" />
         <span className="sr-only">{running ? "Session running" : "Session paused"}</span>
-        <span className={`font-mono text-base font-semibold tabular-nums ${running ? "text-neon" : "text-peach"}`} aria-live="off" data-testid="timer-value">
+        <span className={`font-mono text-base font-semibold tabular-nums ${running ? "text-neon" : "text-peach"}`} aria-live="off" data-testid="timer-value" suppressHydrationWarning>
           {formatDuration(seconds, true)}
         </span>
         {!running && <span className="hidden text-xs font-semibold text-peach sm:inline">Paused</span>}
@@ -286,10 +287,12 @@ export function FinishSession({
       }
     >
       <div className="space-y-6">
-        <div className="tone-midnight relative isolate overflow-hidden rounded-card bg-midnight p-5 text-center">
+        <div className="tone-midnight relative isolate overflow-hidden rounded-card bg-midnight text-center">
+          <FoilStrip left="Session complete" right={new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} sizes="32rem" />
+          <div className="p-5">
           <div aria-hidden="true" className="absolute -top-12 left-1/2 -z-10 size-48 -translate-x-1/2 rounded-full bg-neon/25 blur-3xl" />
           <p className="text-xs font-semibold tracking-[0.16em] text-white/60 uppercase">This session</p>
-          <p className="mt-1 font-mono text-[2.6rem] leading-none font-semibold text-neon" data-testid="finish-duration">
+          <p className="chrome-text mt-1 font-display-tight text-[3rem] leading-none" data-testid="finish-duration">
             {formatDuration(effective)}
           </p>
           <dl className="mt-4 grid grid-cols-2 gap-2 text-left">
@@ -304,6 +307,7 @@ export function FinishSession({
               </dd>
             </div>
           </dl>
+          </div>
         </div>
         <p className="text-sm text-muted">Everything below is optional — “Skip details” still saves this session.</p>
 

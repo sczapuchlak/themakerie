@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { NumberedHeading } from "@/components/editorial/foil";
 import { Sheet } from "@/components/ui/sheet";
 import { addProjectPhoto, removeProjectPhoto, updateProject } from "@/lib/library/actions";
 import { uploadFile } from "@/lib/library/client-files";
@@ -221,14 +222,14 @@ export function ProgressCard({ snapshot }: { snapshot: Snapshot }) {
       <p className="mt-3 text-strong">
         {summary.target !== null && summary.done !== null ? (
           <>
-            <span className="font-display-tight text-[2rem] leading-none">{summary.done}</span>
+            <span className="iridescent-text font-display-tight text-[2.4rem] leading-none">{summary.done}</span>
             <span className="text-muted">
               {" "}
               / {summary.target} {summary.label}
             </span>
           </>
         ) : (
-          <span className="font-display-tight text-[2rem] leading-none">{summary.percent}%</span>
+          <span className="iridescent-text font-display-tight text-[2.4rem] leading-none">{summary.percent}%</span>
         )}
       </p>
       <div className="mt-3 h-3 overflow-hidden rounded-full bg-midnight/[0.08]" role="progressbar" aria-valuenow={summary.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Progress">
@@ -287,7 +288,7 @@ export function ProgressCard({ snapshot }: { snapshot: Snapshot }) {
 type GalleryPhoto = { id: string; url: string | null; storage_path: string; file_name: string | null; session_id: string | null; created_at: string };
 
 /** Editorial gallery: a lead image and a filmstrip. Hidden until there are photos. */
-export function PhotoGallery({ projectId, coverPath, photos }: { projectId: string; coverPath: string | null; photos: GalleryPhoto[] }) {
+export function PhotoGallery({ projectId, coverPath, photos, n }: { projectId: string; coverPath: string | null; photos: GalleryPhoto[]; n?: number }) {
   const router = useRouter();
   const [viewing, setViewing] = useState<GalleryPhoto | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -341,9 +342,9 @@ export function PhotoGallery({ projectId, coverPath, photos }: { projectId: stri
   return (
     <section aria-labelledby="photos-title" data-testid="photo-gallery">
       <div className="flex items-end justify-between gap-3">
-        <h2 id="photos-title" className="font-display-tight text-[clamp(1.4rem,2.6vw,1.75rem)]">
+        <NumberedHeading n={n ?? 1} id="photos-title" size="sm">
           Photos <span className="font-mono text-base font-normal text-muted">{photos.length}</span>
-        </h2>
+        </NumberedHeading>
         {picker("＋ Add", "btn btn-secondary press !min-h-10")}
       </div>
       {busy && <p className="mt-2 text-sm text-body" role="status">{busy}</p>}

@@ -402,3 +402,27 @@ export async function getProject(id: string) {
   };
 }
 export type ProjectDetail = Awaited<ReturnType<typeof getProject>>;
+
+/* --------------------------------------------------------------- home */
+
+export type HomeFeatured = ActiveProject & {
+  row: number;
+  rowLabel: string;
+  session: { status: string; active_seconds: number; resumed_at: string | null } | null;
+};
+
+/** Home: the library data plus the live state of the most recent project. */
+export async function getHome() {
+  const lib = await getLibraryHome();
+  const { supabase } = await session();
+  const top = lib.inProgress[0] ?? null;
+  let featured: HomeFeatured | null = null;
+  if (top) {
+    const [counter, open] = await Promise.all([
+      supabase.from("project_counters").select("value, name").eq("project_id", top.id).eq("is_main", true).maybeSingle(),
+      supabase.from("project_sessions").select("status, active_seconds, resumed_at").eq("project_id", top.id).neq("status", "finished").maybeSingle(),
+    ]);
+    featured = { ...top, row: counter.data?.value ?? 0, rowLabel: counter.data?.name ?? "Rows", session: open.data ?? null };
+  }
+  return { ...lib, featured };
+}

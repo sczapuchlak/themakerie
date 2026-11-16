@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { LocalTime } from "@/components/ui/local-time";
 import { idb } from "@/lib/workspace/idb";
 import {
   computeInsights,
@@ -186,7 +187,7 @@ function NoteItem({ note, ws, editing, onEdit }: { note: Note; ws: Workspace; ed
       <div className="flex items-center gap-2 text-xs">
         <span className="rounded-full bg-selected px-2 py-0.5 font-semibold text-strong">{label}</span>
         {note.pinned && <span aria-label="Pinned">📌</span>}
-        <span className="text-muted">{new Date(note.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+        <LocalTime iso={note.created_at} format={(d) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" })} className="text-muted" />
         <span className="ml-auto flex gap-1">
           <button type="button" className="min-h-9 rounded-full px-2 text-muted hover:bg-selected" onClick={() => save({ pinned: !note.pinned })}>
             {note.pinned ? "Unpin" : "Pin"}
@@ -415,7 +416,7 @@ export function InsightsGrid({ ws }: { ws: Workspace }) {
   const s = ws.state;
   const summary = computeProgress(s);
   const i = computeInsights(s, summary);
-  const since = i.lastWorkedAt ? relative(i.lastWorkedAt) : "—";
+  const since = i.lastWorkedAt ? <LocalTime iso={i.lastWorkedAt} format={(d) => relative(d.toISOString())} /> : "—";
   return (
     <section aria-label="Insights">
       <h3 className="eyebrow">Insights · tracked time</h3>
@@ -439,7 +440,7 @@ export function InsightsGrid({ ws }: { ws: Workspace }) {
   );
 }
 
-function Fact({ label, value }: { label: string; value: string }) {
+function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-tile bg-white px-3 py-2">
       <dt className="text-xs text-muted">{label}</dt>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FoilStrip } from "@/components/editorial/foil";
 import { CoverArt } from "@/components/library/cover-art";
 import { CoverAura } from "@/components/library/cover-palette";
 import { ProgressRing } from "@/components/library/progress-ring";
@@ -48,6 +49,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
       {/* Hero: the make itself, with momentum */}
       <header id="project-hero" className="tone-midnight relative isolate mt-3 overflow-hidden rounded-panel bg-midnight shadow-[0_30px_70px_-34px_rgb(8_22_56/0.65)]" data-testid="project-hero">
         <CoverAura src={snapshot.pattern?.coverUrl ?? null} cacheKey={snapshot.pattern?.cover_path ?? null} className="opacity-80" />
+        <FoilStrip left="Project" right={pattern ? `From ${pattern.title}` : undefined} />
         <div className="grid sm:grid-cols-[minmax(0,14rem)_1fr] lg:grid-cols-[minmax(0,16rem)_1fr_auto]">
           <div className="aspect-[16/9] sm:aspect-auto sm:min-h-[16rem]">
             <CoverArt url={heroImage} title={project.name} craft={pattern?.craft} priority />
@@ -98,8 +100,8 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
 
       <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-10">
-          <PhotoGallery projectId={project.id} coverPath={project.cover_path} photos={photos} />
-          <Journal snapshot={snapshot} />
+          <PhotoGallery projectId={project.id} coverPath={project.cover_path} photos={photos} n={1} />
+          <Journal snapshot={snapshot} n={photos.length ? 2 : 1} />
         </div>
         <aside className="space-y-4">
           <ProgressCard snapshot={snapshot} />

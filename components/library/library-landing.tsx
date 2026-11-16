@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
-import { SectionLabel } from "@/components/editorial/section-label";
+import { FoilStrip, NumberedHeading } from "@/components/editorial/foil";
 import { FOLDER_COLOR_HEX, type FolderColor } from "@/lib/library/constants";
 import type { ActiveProject, CollectionPreviews, FolderOverview, RecentPattern } from "@/lib/library/data";
 import { plural, sinceLabel } from "@/lib/library/format";
@@ -14,15 +14,20 @@ export type { RecentPattern } from "@/lib/library/data";
 
 /* ------------------------------------------------------------ masthead */
 
-export function LibraryMasthead({ total, covers = [] }: { total: number; covers?: RecentPattern[] }) {
+export function LibraryMasthead({ total, active = 0, covers = [] }: { total: number; active?: number; covers?: RecentPattern[] }) {
   const fan = covers.filter((c) => c.coverUrl).slice(0, 3);
   return (
-    <header className="tone-midnight surface-midnight relative isolate mt-4 overflow-hidden rounded-panel p-6 sm:p-8 md:mt-8">
+    <header className="tone-midnight surface-midnight relative isolate mt-4 overflow-hidden rounded-panel p-6 pt-0 sm:p-8 sm:pt-0 md:mt-8">
+      <FoilStrip
+        className="-mx-6 mb-6 sm:-mx-8 sm:mb-8"
+        left="The Makerie — Pattern Library"
+        right={`${plural(total, "pattern")}${active ? ` · ${active} in progress` : ""}`}
+      />
       <div className="tech-grid pointer-events-none absolute inset-0 text-white/[0.05]" />
       <div aria-hidden="true" className="pointer-events-none absolute -top-24 right-10 -z-10 size-80 rounded-full bg-pink/35 blur-[90px]" />
       <div aria-hidden="true" className="pointer-events-none absolute right-1/3 -bottom-32 -z-10 size-72 rounded-full bg-laser/25 blur-[90px]" />
       {fan.length > 0 && (
-        <div aria-hidden="true" className="pointer-events-none absolute top-1/2 right-8 hidden h-[13.5rem] w-[16rem] -translate-y-1/2 lg:block xl:right-14">
+        <div aria-hidden="true" className="pointer-events-none absolute top-[calc(50%+1.4rem)] right-8 hidden h-[12.5rem] w-[15rem] -translate-y-1/2 lg:block xl:right-14">
           {fan.map((c, i) => (
             <div
               key={c.id}
@@ -35,8 +40,7 @@ export function LibraryMasthead({ total, covers = [] }: { total: number; covers?
         </div>
       )}
       <div className="relative max-w-2xl">
-        <SectionLabel>Your collection</SectionLabel>
-        <h1 className="mt-3 font-display-tight text-[clamp(2.4rem,6vw,3.75rem)]">
+        <h1 className="font-display-tight text-[clamp(2.4rem,6vw,3.75rem)]">
           Pattern <span className="font-serif font-normal tracking-normal text-vivid italic">Library</span>
         </h1>
         <p className="mt-2 max-w-md text-body">
@@ -56,12 +60,12 @@ export function LibraryMasthead({ total, covers = [] }: { total: number; covers?
   );
 }
 
-function SectionHead({ id, title, accent, aside }: { id: string; title: string; accent?: string; aside?: React.ReactNode }) {
+function SectionHead({ n, id, title, accent, aside }: { n: number; id: string; title: string; accent?: string; aside?: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
-      <h2 id={id} className="font-display-tight text-[clamp(1.6rem,3vw,2rem)]">
+      <NumberedHeading n={n} id={id}>
         {title} {accent && <span className="font-serif font-normal tracking-normal text-vivid italic">{accent}</span>}
-      </h2>
+      </NumberedHeading>
       {aside}
     </div>
   );
@@ -89,6 +93,7 @@ export function FolderTiles({
   return (
     <section aria-labelledby="folders" className="mt-10 md:mt-12">
       <SectionHead
+        n={1}
         id="folders"
         title="Folders"
         aside={<FolderButton folders={folders} label={<>＋ New folder</>} className="btn btn-secondary press !min-h-10" />}
@@ -220,6 +225,7 @@ export function InProgress({ projects }: { projects: ActiveProject[] }) {
   return (
     <section aria-labelledby="in-progress" className="mt-12 md:mt-14">
       <SectionHead
+        n={2}
         id="in-progress"
         title="In"
         accent="progress"
@@ -273,6 +279,7 @@ function Stats({ p, dark = false }: { p: ActiveProject; dark?: boolean }) {
 function FeaturedProject({ p }: { p: ActiveProject }) {
   return (
     <article className="tone-midnight relative isolate mt-5 grid overflow-hidden rounded-panel bg-midnight sm:grid-cols-[minmax(0,13rem)_1fr] lg:grid-cols-[minmax(0,15rem)_1fr_auto]" data-testid="featured-project">
+      <FoilStrip className="col-span-full" left="Now making" right={p.progress !== null ? `${p.progress}% complete` : "Just started"} />
       <div aria-hidden="true" className="absolute -top-20 right-1/4 -z-10 size-72 rounded-full bg-cobalt/40 blur-[90px]" />
       <div aria-hidden="true" className="absolute -right-10 -bottom-24 -z-10 size-64 rounded-full bg-pink/25 blur-[90px]" />
       <div className="aspect-[16/10] sm:aspect-auto sm:min-h-[15rem]">
@@ -362,6 +369,7 @@ export function RecentShelf({ patterns }: { patterns: RecentPattern[] }) {
   return (
     <section aria-labelledby="recent" className="mt-12 md:mt-14">
       <SectionHead
+        n={3}
         id="recent"
         title="Recently"
         accent="added"

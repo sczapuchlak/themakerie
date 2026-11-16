@@ -30,7 +30,7 @@ function Row({
       href={section.href}
       className={`group flex min-h-20 items-center gap-4 px-5 py-4 transition-colors duration-200 hover:bg-midnight/[0.03] ${className ?? ""}`}
     >
-      <span aria-hidden="true" className="font-mono text-[0.7rem] text-muted">
+      <span aria-hidden="true" className="iridescent-text font-display-tight text-[1.6rem] leading-none">
         {number}
       </span>
       <span className="relative grid size-11 shrink-0 place-items-center">

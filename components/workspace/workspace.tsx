@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FoilStrip } from "@/components/editorial/foil";
 import { CoverAura, usePalette } from "@/components/library/cover-palette";
 import { Sheet } from "@/components/ui/sheet";
 import { statusLabel } from "@/lib/library/constants";
@@ -192,6 +193,7 @@ export function Workspace({ initial }: { initial: Snapshot }) {
       {/* Top bar, tinted by the pattern's cover */}
       <header className="relative isolate flex items-center gap-2 overflow-hidden border-b border-white/10 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] [@media(max-height:500px)]:py-1">
         <CoverAura src={s.pattern?.coverUrl ?? null} cacheKey={s.pattern?.cover_path ?? null} className="opacity-70" />
+        <FoilStrip slim className="absolute inset-x-0 bottom-0" sizes="100vw" />
         <Link href={`/projects/${s.project.id}`} aria-label="Leave Work Mode" className="grid size-11 shrink-0 place-items-center rounded-full text-xl text-white hover:bg-white/10">
           ←
         </Link>

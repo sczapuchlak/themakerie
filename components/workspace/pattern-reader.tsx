@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { FoilStrip } from "@/components/editorial/foil";
 import { CoverAura } from "@/components/library/cover-palette";
 import { StartProject } from "@/components/library/pattern-actions";
 import { defaultGuide, type Bookmark, type ReaderState, type Source } from "@/lib/workspace/model";
@@ -79,6 +80,7 @@ export function PatternReader({
     <div className="tone-midnight fixed inset-0 isolate flex flex-col bg-midnight" data-testid="pattern-reader">
       <header className="relative isolate flex items-center gap-2 overflow-hidden border-b border-white/10 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2">
         <CoverAura src={coverUrl} cacheKey={pattern.coverPath} className="opacity-60" />
+        <FoilStrip slim className="absolute inset-x-0 bottom-0" sizes="100vw" />
         <Link href={`/patterns/${pattern.id}`} aria-label="Back to pattern" className="grid size-11 shrink-0 place-items-center rounded-full text-xl text-white hover:bg-white/10">
           ←
         </Link>

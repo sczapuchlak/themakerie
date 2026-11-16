@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
+import { FoilStrip, NumberedHeading } from "@/components/editorial/foil";
 import { CoverArt } from "@/components/library/cover-art";
 import { CoverAura, PaletteStrip } from "@/components/library/cover-palette";
 import { Progress } from "@/components/library/library-landing";
@@ -62,7 +63,11 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
       {/* Hero: cover anchors, title is expressive but contained. */}
       <header className="tone-midnight relative isolate mt-3 overflow-hidden rounded-panel bg-midnight shadow-[0_30px_70px_-34px_rgb(8_22_56/0.65)]">
         <CoverAura src={coverUrl} cacheKey={p.cover_path} className="opacity-80" />
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <FoilStrip
+          left={`Pattern — ${craft}`}
+          right={[pdfs[0]?.page_count ? plural(pdfs[0].page_count, "page") : null, plural(projects.length, "make")].filter(Boolean).join(" · ")}
+        />
+        <div className="absolute top-[3.6rem] right-4 z-10 flex gap-2">
           <FavoriteToggle id={p.id} favorite={p.favorite} variant="icon" />
           <Link
             href={`/patterns/${p.id}/edit`}
@@ -146,9 +151,9 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
       <section aria-labelledby="makes" className="mt-10">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 id="makes" className="font-display-tight text-[clamp(1.6rem,3vw,2rem)]">
+            <NumberedHeading n={1} id="makes">
               My <span className="font-serif font-normal tracking-normal text-vivid italic">makes</span>
-            </h2>
+            </NumberedHeading>
             <p className="mt-1 text-sm text-muted">
               {projects.length
                 ? `${plural(projects.length, "project")} from this pattern — each with its own progress, counters, notes and photos.`
@@ -309,9 +314,9 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
         <section id="instructions" aria-labelledby="instructions-title" className="scroll-mt-6 lg:order-1">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 id="instructions-title" className="font-display-tight text-[clamp(1.4rem,2.6vw,1.75rem)]">
+              <NumberedHeading n={2} id="instructions-title" size="sm">
                 Instructions
-              </h2>
+              </NumberedHeading>
               <p className="mt-1 text-sm text-muted">
                 {stepCount ? `${plural(sections.length, "section")} · ${plural(stepCount, "step")} · ` : ""}Your working copy — the original {pdfs.length ? "PDF" : "source"} stays authoritative.
               </p>
@@ -334,7 +339,9 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
                   <li key={s.id}>
                     <details className="group card-plain overflow-hidden rounded-card" open={sections.length <= 2 || i === 0}>
                       <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-4 [&::-webkit-details-marker]:hidden">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-midnight font-mono text-sm font-semibold text-neon">{i + 1}</span>
+                        <span aria-hidden="true" className="iridescent-text w-9 shrink-0 text-center font-display-tight text-[1.9rem] leading-none">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
                         <span className="min-w-0 flex-1">
                           <span className="block font-semibold text-strong [overflow-wrap:anywhere]">{s.title}</span>
                           <span className="block text-xs text-muted">
