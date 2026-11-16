@@ -142,7 +142,7 @@ export function Workspace({ initial }: { initial: Snapshot }) {
   const doc = docs.find((d) => d.id === viewId);
   const undoLabel = ws.undoStack.at(-1)?.label ?? null;
   const syncDot = !ws.sync.online ? "bg-white/40" : ws.sync.pending ? "bg-peach" : "bg-neon";
-  const syncText = !ws.sync.online ? "Offline" : ws.sync.pending ? "Saving…" : "Synced";
+  const syncText = !ws.sync.online ? "Offline · saved on this device" : ws.sync.pending ? "Saving…" : "Synced";
 
   const panelBody = (id: PanelId) => {
     switch (id) {

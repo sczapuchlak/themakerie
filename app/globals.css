@@ -496,3 +496,74 @@
     transform: none;
   }
 }
+
+/* -- Editorial polish ---------------------------------------------------- */
+
+/* Holographic hairline border — reserved for special objects (automatic
+   collections, invitations), never every card. Use on a positioned element. */
+@utility holo-border {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    border-radius: inherit;
+    background: conic-gradient(from 140deg, #ae8aff, #f477d3, #ffbc91, #b6ff00, #48d7f5, #494af4, #ae8aff);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* Plain functional card: one colour, quiet edge, soft shadow. */
+@utility card-plain {
+  background: #ffffff;
+  box-shadow:
+    0 0 0 1px rgb(8 22 56 / 0.07),
+    0 18px 40px -28px rgb(8 22 56 / 0.45);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Tactile press for buttons and cards. */
+  .press {
+    transition: transform 160ms var(--ease-soft), box-shadow 200ms var(--ease-soft);
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  .lift {
+    transition: transform 260ms var(--ease-soft), box-shadow 260ms var(--ease-soft);
+  }
+  .lift:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 0 0 1px rgb(8 22 56 / 0.08),
+      0 28px 50px -26px rgb(8 22 56 / 0.55);
+  }
+
+  @keyframes makerie-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.35) rotate(-8deg); }
+    100% { transform: scale(1); }
+  }
+  .pop[data-on="true"] {
+    animation: makerie-pop 380ms var(--ease-soft);
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 320ms;
+    animation-timing-function: var(--ease-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

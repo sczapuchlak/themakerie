@@ -158,12 +158,19 @@ export function CounterList({
 
   return (
     <div className="space-y-3">
+      <p className="text-xs text-muted">
+        <strong className="text-strong">Main</strong> is your row counter. Add your own for repeats, squares, colour changes — each with its own step and target.
+      </p>
       <ul className="space-y-2">
         {counters.map((c, i) => {
           const linked = counters.find((x) => x.id === c.rollover_counter_id);
           const section = sections.find((s) => s.id === c.section_id);
           return (
-            <li key={c.id} className={`rounded-card border p-3 ${c.id === selectedId ? "border-midnight bg-white" : "border-line bg-white/70"}`} data-testid={`counter-${c.name}`}>
+            <li
+              key={c.id}
+              className={`rounded-card p-3 ${c.is_main ? "bg-midnight/[0.04] ring-1 ring-midnight/15" : "card-plain"} ${c.id === selectedId ? "!ring-2 !ring-cobalt" : ""}`}
+              data-testid={`counter-${c.name}`}
+            >
               <div className="flex items-center gap-2">
                 <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onSelect(c.id)}>
                   <span className="block truncate font-semibold text-strong">

@@ -52,33 +52,57 @@ export function startWork(ws: Workspace) {
 const localDate = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-/** Timer pill for the top bar. */
+/**
+ * Timer for the top bar. Each state looks different at a glance:
+ * idle → lime Start; running → live lime time + Pause; paused → amber
+ * "Paused" + Resume; Finish is always the white button.
+ */
 export function TimerControl({ ws, open, onFinish }: { ws: Workspace; open: Session | null; onFinish: () => void }) {
   const now = useNow(open?.status === "active");
   if (!open) {
     return (
-      <button type="button" onClick={() => startWork(ws)} className="btn btn-primary !min-h-10 !px-4" data-testid="timer-start">
-        ▶ Start session
+      <button type="button" onClick={() => startWork(ws)} className="btn btn-primary press !min-h-10 !px-4" data-testid="timer-start">
+        <span aria-hidden="true">▶</span> Start session
       </button>
     );
   }
   const seconds = activeSeconds(open, now);
   const running = open.status === "active";
   return (
-    <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1" data-testid="timer">
-      <span className={`px-2 font-mono text-base font-semibold tabular-nums ${running ? "text-neon" : "text-white/60"}`} aria-live="off" data-testid="timer-value">
-        {formatDuration(seconds, true)}
+    <div
+      className={`flex items-center gap-1 rounded-full p-1 ring-1 ${running ? "bg-neon/10 ring-neon/40" : "bg-peach/15 ring-peach/50"}`}
+      data-testid="timer"
+    >
+      <span className="flex items-center gap-1.5 pr-1 pl-2.5">
+        <span className={`size-2 rounded-full ${running ? "bg-neon motion-safe:animate-pulse" : "bg-peach"}`} aria-hidden="true" />
+        <span className="sr-only">{running ? "Session running" : "Session paused"}</span>
+        <span className={`font-mono text-base font-semibold tabular-nums ${running ? "text-neon" : "text-peach"}`} aria-live="off" data-testid="timer-value">
+          {formatDuration(seconds, true)}
+        </span>
+        {!running && <span className="hidden text-xs font-semibold text-peach sm:inline">Paused</span>}
       </span>
       {running ? (
-        <button type="button" onClick={() => ws.dispatch({ type: "session.upsert", session: pauseSession(open, new Date()) })} className="grid size-10 place-items-center rounded-full bg-white/10 text-white" aria-label="Pause session">
-          ❚❚
+        <button
+          type="button"
+          onClick={() => ws.dispatch({ type: "session.upsert", session: pauseSession(open, new Date()) })}
+          className="press flex min-h-10 items-center gap-1.5 rounded-full bg-white/10 px-3 text-sm font-semibold text-white hover:bg-white/20"
+          aria-label="Pause session"
+        >
+          <span aria-hidden="true">❚❚</span>
+          <span className="hidden sm:inline">Pause</span>
         </button>
       ) : (
-        <button type="button" onClick={() => ws.dispatch({ type: "session.upsert", session: resumeSession(open, new Date()) })} className="grid size-10 place-items-center rounded-full bg-neon text-midnight" aria-label="Resume session">
-          ▶
+        <button
+          type="button"
+          onClick={() => ws.dispatch({ type: "session.upsert", session: resumeSession(open, new Date()) })}
+          className="press flex min-h-10 items-center gap-1.5 rounded-full bg-neon px-3 text-sm font-semibold text-midnight"
+          aria-label="Resume session"
+        >
+          <span aria-hidden="true">▶</span>
+          <span className="hidden sm:inline">Resume</span>
         </button>
       )}
-      <button type="button" onClick={onFinish} className="min-h-10 rounded-full bg-white px-3 text-sm font-semibold text-midnight" data-testid="timer-finish">
+      <button type="button" onClick={onFinish} className="press min-h-10 rounded-full bg-white px-3 text-sm font-semibold text-midnight" data-testid="timer-finish">
         Finish
       </button>
     </div>
@@ -262,11 +286,26 @@ export function FinishSession({
       }
     >
       <div className="space-y-6">
-        <dl className="grid grid-cols-3 gap-2 text-center">
-          <Stat label="This session" value={formatDuration(effective)} testId="finish-duration" />
-          <Stat label="Project total" value={formatDuration(otherTotal + effective)} />
-          <Stat label="Progress" value={`${before.percent}%`} />
-        </dl>
+        <div className="tone-midnight relative isolate overflow-hidden rounded-card bg-midnight p-5 text-center">
+          <div aria-hidden="true" className="absolute -top-12 left-1/2 -z-10 size-48 -translate-x-1/2 rounded-full bg-neon/25 blur-3xl" />
+          <p className="text-xs font-semibold tracking-[0.16em] text-white/60 uppercase">This session</p>
+          <p className="mt-1 font-mono text-[2.6rem] leading-none font-semibold text-neon" data-testid="finish-duration">
+            {formatDuration(effective)}
+          </p>
+          <dl className="mt-4 grid grid-cols-2 gap-2 text-left">
+            <div className="rounded-tile bg-white/10 px-3 py-2">
+              <dt className="text-[0.65rem] font-semibold tracking-[0.12em] text-white/60 uppercase">Project total</dt>
+              <dd className="font-mono font-semibold text-white">{formatDuration(otherTotal + effective)}</dd>
+            </div>
+            <div className="rounded-tile bg-white/10 px-3 py-2">
+              <dt className="text-[0.65rem] font-semibold tracking-[0.12em] text-white/60 uppercase">Progress</dt>
+              <dd className="font-mono font-semibold text-white">
+                {before.percent}%{method === "manual" && percent !== before.percent ? <span className="text-neon"> → {percent}%</span> : null}
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <p className="text-sm text-muted">Everything below is optional — “Skip details” still saves this session.</p>
 
         <fieldset>
           <legend className="eyebrow">Recorded time</legend>
@@ -336,17 +375,6 @@ export function FinishSession({
         )}
       </div>
     </Sheet>
-  );
-}
-
-function Stat({ label, value, testId }: { label: string; value: string; testId?: string }) {
-  return (
-    <div className="rounded-tile bg-selected px-2 py-3">
-      <dt className="text-[0.65rem] font-semibold tracking-[0.12em] text-muted uppercase">{label}</dt>
-      <dd className="mt-1 font-mono text-lg font-semibold text-strong" data-testid={testId}>
-        {value}
-      </dd>
-    </div>
   );
 }
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { difficultyLabel } from "@/lib/library/constants";
 import type { PatternCard } from "@/lib/library/data";
 import { CoverArt } from "./cover-art";
@@ -17,26 +18,32 @@ function activitySummary(p: PatternCard) {
 /** One card per PATTERN, however many projects it has. */
 export function PatternGallery({ rows, crafts }: { rows: PatternCard[]; crafts: Map<string, string> }) {
   return (
-    <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
+    <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {rows.map((p, i) => {
         const activity = activitySummary(p);
         return (
           <li key={p.id}>
             <Link href={`/patterns/${p.id}`} className="group block rounded-card focus-visible:outline-offset-4">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-card shadow-[0_18px_36px_-22px_rgb(8_22_56/0.6)] transition-transform duration-300 ease-soft group-hover:-translate-y-1 group-active:translate-y-0">
-                <CoverArt url={p.coverUrl} title={p.title} craft={p.craft} priority={i < 4} />
+              <div className="card-plain lift relative overflow-hidden rounded-card p-1.5">
+                <ViewTransition name={`cover-${p.id}`} share="morph" default="none">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-[1.1rem]">
+                    <div className="size-full motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-soft motion-safe:group-hover:scale-[1.03]">
+                      <CoverArt url={p.coverUrl} title={p.title} craft={p.craft} priority={i < 4} />
+                    </div>
+                  </div>
+                </ViewTransition>
                 {p.favorite && (
-                  <span className="absolute top-2 right-2 grid size-8 place-items-center rounded-full bg-midnight/85 text-neon" aria-label="Favorite">
+                  <span className="absolute top-3.5 right-3.5 grid size-8 place-items-center rounded-full bg-white/95 text-sm text-[#c01f97] shadow" aria-label="Favourite">
                     ★
                   </span>
                 )}
                 {activity && (
-                  <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-full bg-midnight/85 px-2.5 py-1 text-[0.7rem] font-semibold text-white">
+                  <span className="absolute bottom-3.5 left-3.5 max-w-[calc(100%-1.75rem)] truncate rounded-full bg-midnight/90 px-2.5 py-1 text-[0.7rem] font-semibold text-white">
                     {activity}
                   </span>
                 )}
               </div>
-              <h3 className="mt-3 line-clamp-2 font-semibold leading-snug text-strong">{p.title}</h3>
+              <h3 className="mt-3 line-clamp-2 font-semibold leading-snug text-strong [overflow-wrap:anywhere]">{p.title}</h3>
               <p className="mt-0.5 truncate text-sm text-muted">
                 {craftName(p.craft, crafts)}
                 {p.designer ? ` · ${p.designer}` : ""}
@@ -51,7 +58,7 @@ export function PatternGallery({ rows, crafts }: { rows: PatternCard[]; crafts: 
 
 export function PatternList({ rows, crafts }: { rows: PatternCard[]; crafts: Map<string, string> }) {
   return (
-    <ul className="surface-panel mt-5 divide-y divide-line overflow-hidden rounded-card">
+    <ul className="card-plain mt-5 divide-y divide-line overflow-hidden rounded-card">
       {rows.map((p) => {
         const activity = activitySummary(p);
         const difficulty = difficultyLabel(p.difficulty);

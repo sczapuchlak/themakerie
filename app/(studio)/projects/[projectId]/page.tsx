@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CoverArt } from "@/components/library/cover-art";
-import { DeleteProject, Photos, ProjectDetails, ProjectTracker } from "@/components/library/project-panel";
+import { CoverAura } from "@/components/library/cover-palette";
+import { ProgressRing } from "@/components/library/progress-ring";
+import { DeleteProject } from "@/components/library/project-panel";
+import { EditProject, FloatingWorkButton, PhotoGallery, ProgressCard, StatusMenu } from "@/components/project/project-dashboard";
 import { Journal, ProjectInsights } from "@/components/workspace/journal";
-import { StatusPill } from "@/components/library/status-pill";
 import { getProject } from "@/lib/library/data";
+import { sinceLabel } from "@/lib/library/format";
+import { computeProgress, NOTE_KINDS } from "@/lib/workspace/model";
 import { buildSnapshot, workspaceClient } from "@/lib/workspace/server";
 
 export const metadata: Metadata = { title: "Project" };
 
 export default async function ProjectPage({ params }: PageProps<"/projects/[projectId]">) {
   const { projectId } = await params;
-  const { project, coverUrl, pattern, photos, sources } = await getProject(projectId);
+  const { project, coverUrl, pattern, photos } = await getProject(projectId);
   const { supabase } = await workspaceClient();
   const snapshot = (await buildSnapshot(supabase, projectId))!;
-  const otherLinks = sources.filter((s) => s.kind === "website" || s.kind === "video");
+  const summary = computeProgress(snapshot);
+  const open = snapshot.sessions.find((s) => s.status !== "finished");
+  const latestPhoto = [...photos].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]?.url ?? null;
+  const heroImage = coverUrl ?? latestPhoto ?? snapshot.pattern?.coverUrl ?? null;
+  const active = project.status === "in_progress" || project.status === "planned" || project.status === "paused";
+  const noteGroups = NOTE_KINDS.map((k) => ({ ...k, notes: snapshot.notes.filter((n) => n.kind === k.value) })).filter((g) => g.notes.length);
 
   return (
-    <div className="gutter mx-auto w-full max-w-[72rem]">
+    <div className="gutter mx-auto w-full max-w-[72rem] pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-10">
       <nav aria-label="Breadcrumb" className="mt-4 md:mt-8">
         <ol className="flex flex-wrap items-center gap-1 text-sm text-muted">
           <li>
@@ -26,9 +35,9 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
             </Link>
           </li>
           {pattern && (
-            <li className="flex items-center gap-1">
+            <li className="flex min-w-0 items-center gap-1">
               <span aria-hidden="true">/</span>
-              <Link href={`/patterns/${pattern.id}`} className="font-semibold text-accent hover:underline">
+              <Link href={`/patterns/${pattern.id}`} className="truncate font-semibold text-accent hover:underline">
                 {pattern.title}
               </Link>
             </li>
@@ -36,51 +45,106 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
         </ol>
       </nav>
 
-      <header className="tone-midnight surface-midnight mt-3 grid overflow-hidden rounded-panel sm:grid-cols-[12rem_1fr]">
-        <div className="aspect-[16/9] sm:aspect-auto sm:min-h-52">
-          <CoverArt url={coverUrl} title={project.name} craft={pattern?.craft} priority />
-        </div>
-        <div className="relative p-6 sm:p-8">
-          <div className="tech-grid pointer-events-none absolute inset-0 text-white/[0.04]" />
-          <div className="relative flex flex-wrap items-center gap-2">
-            <StatusPill status={project.status} />
-            {project.size_colorway && <span className="eyebrow">{project.size_colorway}</span>}
+      {/* Hero: the make itself, with momentum */}
+      <header id="project-hero" className="tone-midnight relative isolate mt-3 overflow-hidden rounded-panel bg-midnight shadow-[0_30px_70px_-34px_rgb(8_22_56/0.65)]" data-testid="project-hero">
+        <CoverAura src={snapshot.pattern?.coverUrl ?? null} cacheKey={snapshot.pattern?.cover_path ?? null} className="opacity-80" />
+        <div className="grid sm:grid-cols-[minmax(0,14rem)_1fr] lg:grid-cols-[minmax(0,16rem)_1fr_auto]">
+          <div className="aspect-[16/9] sm:aspect-auto sm:min-h-[16rem]">
+            <CoverArt url={heroImage} title={project.name} craft={pattern?.craft} priority />
           </div>
-          <h1 className="relative mt-3 font-display-tight text-[clamp(2rem,5vw,3.2rem)]">{project.name}</h1>
-          {pattern && (
-            <p className="relative mt-1 text-body">
-              From <Link href={`/patterns/${pattern.id}`} className="font-semibold text-strong underline underline-offset-4">{pattern.title}</Link>
-              {pattern.designer ? ` by ${pattern.designer}` : ""}
+          <div className="flex min-w-0 flex-col p-5 sm:p-7">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusMenu projectId={project.id} status={project.status} finishedOn={project.finished_on} />
+              {project.size_colorway && <span className="text-sm text-white/70">{project.size_colorway}</span>}
+            </div>
+            <h1 className="mt-3 font-display-tight text-[clamp(1.9rem,4.4vw,3rem)] leading-[1.02] text-white [overflow-wrap:anywhere]">{project.name}</h1>
+            {pattern && (
+              <p className="mt-1.5 text-white/75">
+                from{" "}
+                <Link href={`/patterns/${pattern.id}`} className="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-white">
+                  {pattern.title}
+                </Link>
+              </p>
+            )}
+            <div className="mt-4 lg:hidden">
+              <div className="h-2.5 overflow-hidden rounded-full bg-white/15" role="progressbar" aria-valuenow={summary.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Progress">
+                <div className="h-full rounded-full bg-neon" style={{ width: `${summary.percent}%` }} />
+              </div>
+              <p className="mt-1 font-mono text-xs text-white/70">{summary.percent}% complete</p>
+            </div>
+            <p className="mt-3 text-sm text-white/70">
+              {open
+                ? open.status === "active"
+                  ? "● Session running now"
+                  : "Session paused"
+                : project.last_worked_at
+                  ? `Last worked ${sinceLabel(project.last_worked_at)}`
+                  : project.status === "finished"
+                    ? "Finished — well done."
+                    : "Ready when you are."}
             </p>
-          )}
-          <div className="relative mt-5 flex flex-wrap gap-3">
-            <Link href={`/projects/${project.id}/work`} className="btn btn-primary" data-testid="open-work-mode">
-              Open Work Mode
-            </Link>
-            {otherLinks.slice(0, 2).map((s) => (
-              <a key={s.id} href={s.url ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-                {s.kind === "video" ? "Watch tutorial" : "Pattern page"}
-              </a>
-            ))}
+            <div className="mt-auto flex flex-wrap gap-3 pt-5">
+              <Link href={`/projects/${project.id}/work`} className={`btn press ${active ? "btn-primary" : "btn-secondary"}`} data-testid="open-work-mode">
+                {project.status === "in_progress" ? "Continue making →" : "Open Work Mode"}
+              </Link>
+              <EditProject project={project} />
+            </div>
+          </div>
+          <div className="hidden items-center pr-8 lg:flex">
+            <ProgressRing value={summary.percent} size={136} stroke={11} label="complete" tone="dark" />
           </div>
         </div>
       </header>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1.1fr]">
-        <div className="space-y-4">
-          <ProjectTracker project={project} />
-          <ProjectInsights snapshot={snapshot} />
+      <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0 space-y-10">
+          <PhotoGallery projectId={project.id} coverPath={project.cover_path} photos={photos} />
           <Journal snapshot={snapshot} />
         </div>
-        <div className="space-y-4">
-          <ProjectDetails project={project} />
-          <Photos project={project} photos={photos} />
-        </div>
+        <aside className="space-y-4">
+          <ProgressCard snapshot={snapshot} />
+          <ProjectInsights snapshot={snapshot} />
+
+          <section aria-labelledby="notes-title" className="card-plain rounded-card p-5" data-testid="notes">
+            <div className="flex items-center justify-between gap-3">
+              <h2 id="notes-title" className="font-semibold text-strong">
+                Notes
+              </h2>
+              <EditProject project={project} trigger="notes" />
+            </div>
+            {project.notes ? (
+              <p className="mt-2 text-sm whitespace-pre-wrap text-body" data-testid="notes-body">
+                {project.notes}
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-muted">Nothing yet — yarn swaps, needle sizes, what you changed.</p>
+            )}
+            {noteGroups.map((g) => (
+              <div key={g.value} className="mt-4">
+                <h3 className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">{g.label}</h3>
+                <ul className="mt-1.5 space-y-1.5">
+                  {g.notes.map((n) => (
+                    <li key={n.id} className="rounded-tile bg-selected px-3 py-2 text-sm whitespace-pre-wrap text-body">
+                      {n.pinned && <span aria-label="Pinned">📌 </span>}
+                      {n.body}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        </aside>
       </div>
 
-      <div className="mt-4 border-t border-line pt-4">
+      <section aria-label="Manage project" className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-5 text-sm">
+        <span className="eyebrow mr-1">Manage</span>
         <DeleteProject project={project} />
-      </div>
+      </section>
+
+      {/* Phone: the way back into making once the hero has scrolled away. */}
+      {active && (
+        <FloatingWorkButton href={`/projects/${project.id}/work`} label={project.status === "in_progress" ? "Continue making →" : "Open Work Mode"} targetId="project-hero" />
+      )}
     </div>
   );
 }

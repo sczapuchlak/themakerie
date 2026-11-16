@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { loadPdfjs } from "@/lib/library/client-files";
 import { defaultGuide, GUIDE_COLORS, type Bookmark, type Guide, type ReaderState, type Source } from "@/lib/workspace/model";
@@ -20,6 +20,8 @@ type PageSize = { w: number; h: number };
 type PdfDoc = Awaited<ReturnType<Awaited<ReturnType<typeof loadPdfjs>>["getDocument"]>["promise"]>;
 
 const PAD = 12;
+const HINT_KEY = "makerie-hint-highlighter";
+const subscribeHint = () => () => {};
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const MAX_CANVAS_PIXELS = 12_000_000; // under iOS Safari's canvas limit
 
@@ -58,6 +60,27 @@ export function Reader({
   const [toolsOpen, setToolsOpen] = useState(true);
   const [guideSheet, setGuideSheet] = useState(false);
   const [pagesSheet, setPagesSheet] = useState(false);
+
+  // One-time explanation of the highlighter (remembered on this device).
+  const hintSeen = useSyncExternalStore(
+    subscribeHint,
+    () => {
+      try {
+        return localStorage.getItem(HINT_KEY) === "1";
+      } catch {
+        return true;
+      }
+    },
+    () => true,
+  );
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const showHint = !hintSeen && !hintDismissed;
+  const dismissHint = () => {
+    setHintDismissed(true);
+    try {
+      localStorage.setItem(HINT_KEY, "1");
+    } catch {}
+  };
 
   const scroller = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -485,6 +508,22 @@ export function Reader({
         )}
       </div>
 
+      {showHint && pageSize && (
+        <div className="tone-paper pointer-events-auto absolute inset-x-3 bottom-[4.25rem] z-20 mx-auto max-w-md rounded-card bg-white p-4 text-sm shadow-2xl" role="note" data-testid="highlighter-hint">
+          <p className="font-semibold text-strong">Your row highlighter</p>
+          <ul className="mt-1.5 space-y-1 text-body">
+            <li>
+              Drag the <span className="inline-grid size-5 place-items-center rounded-full bg-midnight text-[0.6rem] text-neon">⇕</span> handle to the row you&rsquo;re on.
+            </li>
+            <li>▲ ▼ move it exactly one row (set the thickness to one row).</li>
+            <li>Tap <strong>Row</strong> for colour, thickness, column guides and dimming.</li>
+          </ul>
+          <button type="button" className="btn btn-ink press mt-3 !min-h-9 !px-4 !text-xs" onClick={dismissHint}>
+            Got it
+          </button>
+        </div>
+      )}
+
       {/* Reader toolbar: compact, scrollable, collapsible */}
       <div className="tone-midnight pointer-events-none absolute inset-x-0 bottom-2 flex justify-center px-2">
         <div className="pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/15 bg-midnight/90 p-1 shadow-xl backdrop-blur no-scrollbar">
@@ -507,15 +546,25 @@ export function Reader({
               </button>
               <ToolButton label="Zoom in" onClick={() => zoomTo(scale * 1.25)}>+</ToolButton>
               <Divider />
-              <ToolButton label={rowDirection === "up" ? "Next row (up)" : "Previous row"} onClick={() => stepGuide(-1)} testId="guide-prev">
-                ▲
-              </ToolButton>
-              <ToolButton label={rowDirection === "up" ? "Previous row (down)" : "Next row"} onClick={() => stepGuide(1)} testId="guide-next">
-                ▼
-              </ToolButton>
-              <ToolButton label="Highlighter settings" onClick={() => setGuideSheet(true)}>
-                <span className="block h-2.5 w-5 rounded-sm" style={{ background: g?.color ?? "#B6FF00" }} />
-              </ToolButton>
+              {/* Highlighter group: swatch opens settings, arrows move exactly one row */}
+              <div className="flex shrink-0 items-center rounded-full bg-white/10 pl-1" role="group" aria-label="Row highlighter">
+                <button
+                  type="button"
+                  onClick={() => setGuideSheet(true)}
+                  aria-label="Highlighter colour, thickness and guides"
+                  title="Highlighter settings"
+                  className="flex min-h-11 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold text-white hover:bg-white/10"
+                >
+                  <span className="block h-3 w-5 rounded-sm ring-1 ring-white/40" style={{ background: g?.color ?? "#B6FF00" }} />
+                  Row
+                </button>
+                <ToolButton label={rowDirection === "up" ? "Next row (up)" : "Previous row"} onClick={() => stepGuide(-1)} testId="guide-prev">
+                  ▲
+                </ToolButton>
+                <ToolButton label={rowDirection === "up" ? "Previous row (down)" : "Next row"} onClick={() => stepGuide(1)} testId="guide-next">
+                  ▼
+                </ToolButton>
+              </div>
               <ToolButton
                 label="Bookmark this spot"
                 onClick={() => {

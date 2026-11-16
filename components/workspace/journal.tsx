@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { syncWorkspace } from "@/lib/workspace/actions";
+import { sinceLabel } from "@/lib/library/format";
 import { computeInsights, computeProgress, formatDuration, NOTE_KINDS, sessionSeconds, type Op, type Session, type Snapshot } from "@/lib/workspace/model";
 
 const op = <T extends Omit<Op, "opId" | "at">>(o: T) => ({ ...o, opId: crypto.randomUUID(), at: new Date().toISOString() }) as unknown as Op;
@@ -18,76 +19,88 @@ export function Journal({ snapshot }: { snapshot: Snapshot }) {
   const open = snapshot.sessions.find((s) => s.status !== "finished");
 
   return (
-    <section aria-labelledby="journal" className="surface-panel rounded-card p-5 sm:p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 id="journal" className="eyebrow">
+    <section aria-labelledby="journal" data-testid="journal">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h2 id="journal" className="font-display-tight text-[clamp(1.4rem,2.6vw,1.75rem)]">
           Journal
         </h2>
-        <button type="button" className="btn btn-secondary !min-h-10" onClick={() => setAdding(true)}>
+        <button type="button" className="btn btn-secondary press !min-h-10" onClick={() => setAdding(true)}>
           ＋ Past session
         </button>
       </div>
       {open && (
-        <p className="mt-3 rounded-tile bg-selected px-3 py-2 text-sm">
+        <p className="mt-3 flex items-center gap-2 rounded-tile bg-midnight px-4 py-2.5 text-sm text-white">
+          <span className="size-2 rounded-full bg-neon motion-safe:animate-pulse" aria-hidden="true" />
           A session is {open.status === "active" ? "running" : "paused"} — finish it in Work Mode to add it here.
         </p>
       )}
       {sessions.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">Each work session lands here with its time, progress, notes and photos.</p>
+        <div className="mt-4 rounded-card border-2 border-dashed border-line px-5 py-6">
+          <p className="font-semibold text-strong">Your making story starts here.</p>
+          <p className="mt-1 text-sm text-body">
+            Start a session in Work Mode and finish it — the time, progress, notes and photos land here as a timeline. Forgot to time one? Add a past session.
+          </p>
+        </div>
       ) : (
-        <ol className="relative mt-4 space-y-5 border-l-2 border-line pl-5" data-testid="journal-list">
+        <ol className="relative mt-5 space-y-4" data-testid="journal-list">
+          <span aria-hidden="true" className="absolute top-2 bottom-2 left-[1.6rem] w-px bg-gradient-to-b from-cobalt/40 via-pink/30 to-transparent" />
           {sessions.map((s) => {
             const photos = snapshot.photos.filter((p) => p.session_id === s.id);
             const notes = snapshot.notes.filter((n) => n.session_id === s.id);
             const milestones = snapshot.milestones.filter((m) => m.session_id === s.id);
             const seconds = sessionSeconds(s);
+            const d = new Date(s.started_at);
+            const gained = s.progress_before !== null && s.progress_after !== null ? s.progress_after - s.progress_before : 0;
             return (
-              <li key={s.id} className="relative">
-                <span aria-hidden="true" className="absolute top-1.5 -left-[1.6rem] size-3 rounded-full border-2 border-paper bg-cobalt" />
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h3 className="font-semibold text-strong">
-                    {new Date(s.started_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
-                  </h3>
-                  <span className="font-mono text-sm text-strong" data-testid="journal-duration">
-                    {formatDuration(seconds)}
-                  </span>
-                  {s.adjusted_seconds !== null && <span className="text-xs text-muted">(corrected from {formatDuration(s.active_seconds)})</span>}
-                  {s.progress_before !== null && s.progress_after !== null && s.progress_after !== s.progress_before && (
-                    <span className="rounded-full bg-[#e6ffb3] px-2 py-0.5 text-xs font-semibold text-[#2b4a00]">
-                      {s.progress_before}% → {s.progress_after}%
-                    </span>
-                  )}
-                  <button type="button" className="ml-auto min-h-9 text-sm font-semibold text-accent" onClick={() => setEditing(s)}>
-                    Edit
-                  </button>
+              <li key={s.id} className="relative flex gap-4">
+                <div className="relative z-10 grid w-[3.2rem] shrink-0 place-items-center self-start rounded-tile bg-white py-1.5 text-center shadow-sm ring-1 ring-line">
+                  <span className="text-[0.6rem] font-semibold tracking-[0.12em] text-muted uppercase">{d.toLocaleDateString(undefined, { month: "short" })}</span>
+                  <span className="font-display-tight text-xl leading-none text-strong">{d.getDate()}</span>
                 </div>
-                {s.accomplished && <p className="mt-1 text-sm whitespace-pre-wrap text-body">{s.accomplished}</p>}
-                {s.note && <p className="mt-1 text-sm text-muted">{s.note}</p>}
-                {milestones.map((m) => (
-                  <p key={m.id} className="mt-1 text-sm font-semibold text-strong">
-                    ★ {m.title}
-                  </p>
-                ))}
-                {notes.map((n) => (
-                  <p key={n.id} className="mt-1 text-sm text-body">
-                    <span className="mr-1 rounded-full bg-selected px-2 py-0.5 text-xs font-semibold">{NOTE_KINDS.find((k) => k.value === n.kind)?.label}</span>
-                    {n.body}
-                  </p>
-                ))}
-                {photos.length > 0 && (
-                  <ul className="mt-2 flex gap-2 overflow-x-auto no-scrollbar">
-                    {photos.map((p) =>
-                      p.url ? (
-                        <li key={p.id} className="shrink-0">
-                          <button type="button" onClick={() => setViewing(p.url)} className="block size-20 overflow-hidden rounded-tile" aria-label="View photo">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={p.url} alt={p.file_name ?? "Session photo"} className="size-full object-cover" loading="lazy" />
-                          </button>
-                        </li>
-                      ) : null,
+                <article className="card-plain min-w-0 flex-1 rounded-card p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-midnight px-2.5 py-0.5 font-mono text-xs font-semibold text-white" data-testid="journal-duration">
+                      {formatDuration(seconds)}
+                    </span>
+                    {s.adjusted_seconds !== null && <span className="text-xs text-muted">corrected from {formatDuration(s.active_seconds)}</span>}
+                    {gained > 0 && (
+                      <span className="rounded-full bg-[#e6ffb3] px-2.5 py-0.5 text-xs font-semibold text-[#2b4a00]">
+                        +{gained}% · {s.progress_before}% → {s.progress_after}%
+                      </span>
                     )}
-                  </ul>
-                )}
+                    <span className="text-xs text-muted">{d.toLocaleDateString(undefined, { weekday: "long" })}</span>
+                    <button type="button" className="ml-auto min-h-9 text-sm font-semibold text-accent hover:underline" onClick={() => setEditing(s)}>
+                      Edit
+                    </button>
+                  </div>
+                  {s.accomplished && <p className="mt-2 whitespace-pre-wrap text-body">{s.accomplished}</p>}
+                  {s.note && <p className="mt-1 text-sm text-muted">{s.note}</p>}
+                  {milestones.map((m) => (
+                    <p key={m.id} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#fde7f6] px-2.5 py-1 text-xs font-semibold text-[#8a1466]">
+                      ★ {m.title}
+                    </p>
+                  ))}
+                  {notes.map((n) => (
+                    <p key={n.id} className="mt-2 text-sm text-body">
+                      <span className="mr-1.5 rounded-full bg-selected px-2 py-0.5 text-xs font-semibold">{NOTE_KINDS.find((k) => k.value === n.kind)?.label}</span>
+                      {n.body}
+                    </p>
+                  ))}
+                  {photos.length > 0 && (
+                    <ul className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
+                      {photos.map((p) =>
+                        p.url ? (
+                          <li key={p.id} className="shrink-0">
+                            <button type="button" onClick={() => setViewing(p.url)} className="press block h-28 w-28 overflow-hidden rounded-tile sm:h-32 sm:w-32" aria-label="View photo">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={p.url} alt={p.file_name ?? "Session photo"} className="size-full object-cover" loading="lazy" />
+                            </button>
+                          </li>
+                        ) : null,
+                      )}
+                    </ul>
+                  )}
+                </article>
               </li>
             );
           })}
@@ -248,35 +261,35 @@ function SessionEditor({ projectId, session, onClose, onSaved }: { projectId: st
   );
 }
 
-/** Insights card for the project page (server data, no live timer). */
+/** Insights strip for the project page: only stats that say something. */
 export function ProjectInsights({ snapshot }: { snapshot: Snapshot }) {
   const summary = computeProgress(snapshot);
   const i = computeInsights(snapshot, summary);
+  const p = snapshot.project;
+  const fmtDate = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   const facts: [string, string][] = [
-    ["Active crafting time", formatDuration(i.totalSeconds)],
-    ["Sessions", String(i.sessionCount)],
-    ["Average session", i.averageSeconds ? formatDuration(i.averageSeconds) : "—"],
-    ["Progress", `${summary.percent}%${summary.target ? ` · ${summary.done}/${summary.target} ${summary.label}` : ""}`],
-    ["Started", snapshot.project.started_on ?? "—"],
-    ["Finished", snapshot.project.finished_on ?? "—"],
-  ];
+    i.totalSeconds > 0 ? ["Crafting time", formatDuration(i.totalSeconds)] : null,
+    i.sessionCount > 0 ? ["Sessions", String(i.sessionCount)] : null,
+    i.averageSeconds ? ["Avg. session", formatDuration(i.averageSeconds)] : null,
+    i.lastWorkedAt ? ["Last worked", sinceLabel(i.lastWorkedAt) ?? "—"] : null,
+    p.started_on ? ["Started", fmtDate(p.started_on)] : null,
+    p.status === "finished" && p.finished_on ? ["Finished", fmtDate(p.finished_on)] : null,
+  ].filter((x): x is [string, string] => Boolean(x));
+  if (!facts.length) return null;
   return (
-    <section aria-labelledby="insights" className="surface-panel rounded-card p-5 sm:p-6">
-      <h2 id="insights" className="eyebrow">
-        Insights
-      </h2>
-      <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+    <section aria-label="Insights" className="card-plain rounded-card p-5" data-testid="insights">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3">
         {facts.map(([k, v]) => (
           <div key={k}>
             <dt className="text-xs text-muted">{k}</dt>
-            <dd className="font-semibold text-strong" data-testid={`insight-${k}`}>
+            <dd className="mt-0.5 font-semibold text-strong" data-testid={`insight-${k}`}>
               {v}
             </dd>
           </div>
         ))}
       </dl>
       {i.estimateRemainingSeconds !== null && (
-        <p className="mt-3 text-sm">
+        <p className="mt-4 rounded-tile bg-selected px-3 py-2 text-sm">
           <strong>Estimate:</strong> about {formatDuration(i.estimateRemainingSeconds)} left at your recorded pace — a guess, not a promise.
         </p>
       )}

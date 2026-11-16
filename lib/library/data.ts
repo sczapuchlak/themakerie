@@ -74,54 +74,131 @@ export function folderPath(folders: FolderOverview[], id: string | null) {
 export type ActiveProject = {
   id: string;
   name: string;
+  status: string;
   progress: number | null;
   last_worked_at: string | null;
   coverUrl: string | null;
+  /** Finished-session time (corrections replace timer time). */
+  trackedSeconds: number;
+  sessionCount: number;
   pattern: { id: string; title: string; craft: string } | null;
 };
 
+export type RecentPattern = {
+  id: string;
+  title: string;
+  craft: string;
+  designer: string | null;
+  favorite: boolean;
+  project_count: number;
+  active_count: number;
+  coverUrl: string | null;
+};
+
+/** Up to three cover previews per collection, for the folder objects. */
+export type CollectionPreviews = { all: string[]; unsorted: string[]; folders: Record<string, string[]> };
+
 export async function getLibraryHome() {
   const { supabase } = await session();
-  const [folders, all, unsorted, active, recentRows] = await Promise.all([
+  const [folders, all, unsorted, active, recentRows, coverRows] = await Promise.all([
     supabase.from("folder_overview").select("*").order("sort_order").order("name"),
     supabase.from("patterns").select("id", { count: "exact", head: true }).is("archived_at", null),
     supabase.from("patterns").select("id", { count: "exact", head: true }).is("archived_at", null).is("folder_id", null),
     supabase
       .from("projects")
-      .select("id, name, progress, last_worked_at, updated_at, cover_path, pattern:patterns(id, title, craft, cover_path)")
+      .select("id, name, status, progress, last_worked_at, updated_at, cover_path, pattern:patterns(id, title, craft, cover_path)")
       .eq("status", "in_progress")
       .order("last_worked_at", { ascending: false, nullsFirst: false })
       .order("updated_at", { ascending: false })
       .limit(24),
     supabase
-      .from("patterns")
-      .select("id, title, craft, designer, cover_path")
+      .from("pattern_overview")
+      .select("id, title, craft, designer, cover_path, favorite, project_count, active_count")
       .is("archived_at", null)
       .order("created_at", { ascending: false })
       .limit(10),
+    supabase.from("patterns").select("folder_id, cover_path").is("archived_at", null).not("cover_path", "is", null).order("created_at", { ascending: false }).limit(300),
   ]);
   if (folders.error) throw folders.error;
 
   const projects = active.data ?? [];
-  const urls = await signPaths(
-    supabase,
-    [...projects.flatMap((p) => [p.cover_path, p.pattern?.cover_path]), ...(recentRows.data ?? []).map((r) => r.cover_path)],
-  );
+  const folderRows = folders.data ?? [];
+
+  // Cover previews: newest first, rolled up to each top-level folder.
+  const parent = new Map(folderRows.map((f) => [f.id, f.parent_id]));
+  const topOf = (id: string) => {
+    let cur = id;
+    for (let i = 0; i < 50 && parent.get(cur); i++) cur = parent.get(cur)!;
+    return cur;
+  };
+  const previews: { all: string[]; unsorted: string[]; folders: Record<string, string[]> } = { all: [], unsorted: [], folders: {} };
+  for (const r of coverRows.data ?? []) {
+    if (!r.cover_path) continue;
+    if (previews.all.length < 3) previews.all.push(r.cover_path);
+    if (!r.folder_id) {
+      if (previews.unsorted.length < 3) previews.unsorted.push(r.cover_path);
+    } else {
+      const top = topOf(r.folder_id);
+      const list = (previews.folders[top] ??= []);
+      if (list.length < 3) list.push(r.cover_path);
+    }
+  }
+
+  const [urls, tracked] = await Promise.all([
+    signPaths(supabase, [
+      ...projects.flatMap((p) => [p.cover_path, p.pattern?.cover_path]),
+      ...(recentRows.data ?? []).map((r) => r.cover_path),
+      ...previews.all,
+      ...previews.unsorted,
+      ...Object.values(previews.folders).flat(),
+    ]),
+    projects.length
+      ? supabase.from("project_sessions").select("project_id, duration_seconds").in("project_id", projects.map((p) => p.id)).eq("status", "finished")
+      : Promise.resolve({ data: [] as { project_id: string; duration_seconds: number | null }[] }),
+  ]);
+  const time = new Map<string, { s: number; n: number }>();
+  for (const row of tracked.data ?? []) {
+    const t = time.get(row.project_id) ?? { s: 0, n: 0 };
+    t.s += row.duration_seconds ?? 0;
+    t.n++;
+    time.set(row.project_id, t);
+  }
+  const signed = (paths: string[]) => paths.map((p) => urls.get(p)).filter((u): u is string => Boolean(u));
+
   const inProgress: ActiveProject[] = projects.map((p) => ({
     id: p.id,
     name: p.name,
+    status: p.status,
     progress: p.progress,
     last_worked_at: p.last_worked_at,
     coverUrl: urls.get(p.cover_path ?? "") ?? urls.get(p.pattern?.cover_path ?? "") ?? null,
+    trackedSeconds: time.get(p.id)?.s ?? 0,
+    sessionCount: time.get(p.id)?.n ?? 0,
     pattern: p.pattern ? { id: p.pattern.id, title: p.pattern.title, craft: p.pattern.craft } : null,
   }));
 
   return {
-    folders: folders.data ?? [],
+    folders: folderRows,
     allCount: all.count ?? 0,
     unsortedCount: unsorted.count ?? 0,
     inProgress,
-    recent: (recentRows.data ?? []).map((r) => ({ ...r, coverUrl: urls.get(r.cover_path ?? "") ?? null })),
+    recent: (recentRows.data ?? []).map(
+      (r): RecentPattern => ({
+        id: r.id!,
+        title: r.title!,
+        craft: r.craft!,
+        designer: r.designer,
+        favorite: Boolean(r.favorite),
+        project_count: r.project_count ?? 0,
+        active_count: r.active_count ?? 0,
+        coverUrl: urls.get(r.cover_path ?? "") ?? null,
+      }),
+    ),
+    previews: {
+      all: signed(previews.all),
+      unsorted: signed(previews.unsorted),
+      folders: Object.fromEntries(Object.entries(previews.folders).map(([k, v]) => [k, signed(v)])),
+    } satisfies CollectionPreviews,
   };
 }
 

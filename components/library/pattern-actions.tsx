@@ -14,24 +14,36 @@ const ErrorText = ({ children }: { children: React.ReactNode }) => (
   </p>
 );
 
-export function FavoriteToggle({ id, favorite }: { id: string; favorite: boolean }) {
+export function FavoriteToggle({ id, favorite, variant = "button" }: { id: string; favorite: boolean; variant?: "button" | "icon" }) {
   const [on, setOn] = useState(favorite);
   const [pending, start] = useTransition();
+  const toggle = () =>
+    start(async () => {
+      setOn(!on);
+      const r = await setFavorite(id, !on);
+      if (!r.ok) setOn(on);
+    });
+  if (variant === "icon") {
+    return (
+      <button
+        type="button"
+        aria-pressed={on}
+        aria-label={on ? "Remove from favourites" : "Add to favourites"}
+        title={on ? "Favourite" : "Add to favourites"}
+        disabled={pending}
+        onClick={toggle}
+        className="press grid size-11 place-items-center rounded-full bg-white/10 text-xl text-white ring-1 ring-white/15 hover:bg-white/20"
+        data-testid="favorite-toggle"
+      >
+        <span aria-hidden="true" className={`pop block ${on ? "text-pink" : ""}`} data-on={on}>
+          {on ? "★" : "☆"}
+        </span>
+      </button>
+    );
+  }
   return (
-    <button
-      type="button"
-      aria-pressed={on}
-      disabled={pending}
-      onClick={() =>
-        start(async () => {
-          setOn(!on);
-          const r = await setFavorite(id, !on);
-          if (!r.ok) setOn(on);
-        })
-      }
-      className="btn btn-secondary"
-    >
-      <span aria-hidden="true" className={on ? "text-[#6a8f00]" : ""}>
+    <button type="button" aria-pressed={on} disabled={pending} onClick={toggle} className="btn btn-secondary press">
+      <span aria-hidden="true" className={`pop ${on ? "text-[#6a8f00]" : ""}`} data-on={on}>
         {on ? "★" : "☆"}
       </span>
       {on ? "Favorite" : "Add to favorites"}
@@ -39,15 +51,15 @@ export function FavoriteToggle({ id, favorite }: { id: string; favorite: boolean
   );
 }
 
-export function MovePattern({ id, folderId, folders }: { id: string; folderId: string | null; folders: FolderOption[] }) {
+export function MovePattern({ id, folderId, folders, className = "btn btn-secondary" }: { id: string; folderId: string | null; folders: FolderOption[]; className?: string }) {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(folderId ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   return (
     <>
-      <button type="button" className="btn btn-secondary" onClick={() => setOpen(true)}>
-        Move…
+      <button type="button" className={className} onClick={() => setOpen(true)}>
+        Move to folder…
       </button>
       <Sheet
         open={open}
@@ -86,10 +98,10 @@ export function MovePattern({ id, folderId, folders }: { id: string; folderId: s
   );
 }
 
-export function ArchivePattern({ id, archived }: { id: string; archived: boolean }) {
+export function ArchivePattern({ id, archived, className = "btn btn-secondary" }: { id: string; archived: boolean; className?: string }) {
   const [pending, start] = useTransition();
   return (
-    <button type="button" className="btn btn-secondary" disabled={pending} onClick={() => start(async () => void (await archivePattern(id, !archived)))}>
+    <button type="button" className={className} disabled={pending} onClick={() => start(async () => void (await archivePattern(id, !archived)))}>
       {archived ? "Restore from archive" : "Archive"}
     </button>
   );
@@ -243,8 +255,8 @@ export function ContinueChooser({ projects }: { projects: { id: string; name: st
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" className="btn btn-primary" onClick={() => setOpen(true)}>
-        Continue… ({projects.length})
+      <button type="button" className="btn btn-primary press" onClick={() => setOpen(true)}>
+        Continue making… ({projects.length})
       </button>
       <Sheet open={open} onClose={() => setOpen(false)} title="Which project?">
         <ul className="space-y-2">
