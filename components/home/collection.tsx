@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ThreadCoil } from "@/components/art/holo-art";
 
 /**
  * Home collection — Active projects / Recent patterns. One calm, luminous
@@ -61,7 +60,7 @@ export function Collection({
 
       <div className="relative mt-5 flex items-center gap-5 border-t border-line pt-5">
         <Slot kind={variant} />
-        <div className={`min-w-0 ${projects ? "" : "pr-16 sm:pr-32"}`}>
+        <div className="min-w-0">
           <p className="font-semibold text-strong">{emptyTitle}</p>
           <p className="mt-1 text-sm leading-relaxed text-muted">{message}</p>
           <Link
@@ -74,12 +73,6 @@ export function Collection({
         </div>
       </div>
 
-      {!projects && (
-        <ThreadCoil
-          sizes="180px"
-          className="pointer-events-none absolute -right-10 -bottom-12 w-28 rotate-[-8deg] sm:-right-9 sm:w-40"
-        />
-      )}
     </section>
   );
 }
