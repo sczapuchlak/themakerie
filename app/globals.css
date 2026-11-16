@@ -387,6 +387,78 @@
   }
 }
 
+/* Primary action on light surfaces — midnight ink, white type. */
+@utility btn-ink {
+  background-color: var(--color-midnight);
+  color: #ffffff;
+  box-shadow: 0 10px 24px -14px rgb(8 22 56 / 0.7);
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* Destructive action. */
+@utility btn-danger {
+  background-color: #a3123f;
+  color: #ffffff;
+}
+
+/* Form fields on paper/panel surfaces. */
+@utility field {
+  display: block;
+  width: 100%;
+  min-height: 2.875rem;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line-strong);
+  background-color: #ffffff;
+  padding: 0.65rem 0.9rem;
+  font-size: 1rem; /* ≥16px avoids iOS zoom-on-focus */
+  color: var(--text-strong);
+  outline: none;
+
+  &:focus {
+    border-color: var(--color-midnight);
+    box-shadow: 0 0 0 3px rgb(73 74 244 / 0.2);
+  }
+
+  &::placeholder {
+    color: #7b84a8;
+  }
+}
+
+/* Selectable filter / option chip. */
+@utility chip {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  border: 1px solid var(--line-strong);
+  background-color: #ffffff;
+  padding-inline: 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  white-space: nowrap;
+
+  &[aria-pressed="true"],
+  &[data-active="true"] {
+    background-color: var(--color-midnight);
+    border-color: var(--color-midnight);
+    color: #ffffff;
+  }
+}
+
+/* Hide scrollbars on horizontal carousels (still scrollable/swipeable). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* -- Motion (only when the user allows it) -------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
   .sidebar-transition {

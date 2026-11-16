@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { isActivePath, primaryNav } from "@/lib/navigation";
 import { NavIcon } from "./nav-icon";
 
@@ -14,8 +15,24 @@ type PrimaryNavProps = {
   variant: "sidebar" | "tabs";
 };
 
+/**
+ * The pathname is request-time data on routes with dynamic params, so the
+ * active state streams in under Suspense; the fallback is the same nav with
+ * nothing highlighted, keeping the shell prerendered.
+ */
 export function PrimaryNav({ variant }: PrimaryNavProps) {
-  const pathname = usePathname();
+  return (
+    <Suspense fallback={<NavList variant={variant} pathname="" />}>
+      <ActiveNav variant={variant} />
+    </Suspense>
+  );
+}
+
+function ActiveNav({ variant }: PrimaryNavProps) {
+  return <NavList variant={variant} pathname={usePathname()} />;
+}
+
+function NavList({ variant, pathname }: PrimaryNavProps & { pathname: string }) {
 
   if (variant === "sidebar") {
     return (
@@ -60,7 +77,7 @@ export function PrimaryNav({ variant }: PrimaryNavProps) {
       aria-label="Primary"
       className="tone-midnight fixed inset-x-0 bottom-0 z-40 border-t border-line bg-midnight pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] backdrop-blur-xl md:hidden"
     >
-      <ul className="mx-auto grid h-(--tabbar-height) max-w-lg grid-cols-5">
+      <ul className="mx-auto grid h-(--tabbar-height) max-w-lg grid-cols-4">
         {primaryNav.map((item) => {
           const active = isActivePath(pathname, item.href);
           return (

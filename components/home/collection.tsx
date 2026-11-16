@@ -11,7 +11,7 @@ type CollectionProps = {
   id: string;
   number: string;
   title: string;
-  href: "/projects" | "/patterns";
+  href: "/patterns" | `/patterns/${string}`;
   viewAllLabel: string;
   emptyTitle: string;
   message: string;

@@ -5,7 +5,7 @@ import type { NavItem } from "./navigation";
  * shared by the Home overview and each section's placeholder page.
  * Each area owns a single pastel tint.
  */
-export type SectionSlug = "patterns" | "projects" | "stash" | "gallery";
+export type SectionSlug = "patterns" | "stash" | "gallery";
 
 export type StudioSection = {
   slug: SectionSlug;
@@ -32,18 +32,6 @@ export const sections: Record<SectionSlug, StudioSection> = {
       "A home for every pattern you own or dream about — PDFs, charts and images, organized by craft and ready to open in a focused reader.",
     plans: ["Pattern library by craft", "Interactive PDF & chart reader", "Row highlighters and notes"],
     tint: "var(--color-ultraviolet)",
-  },
-  projects: {
-    slug: "projects",
-    href: "/projects",
-    icon: "projects",
-    title: "Projects",
-    kicker: "Everything on the needles.",
-    summary: "Works in progress, counters and session timers.",
-    description:
-      "Track each work in progress on its own terms — the pattern it follows, the materials it uses, and exactly where you left off.",
-    plans: ["Independent projects for every craft", "Customizable row & stitch counters", "Session timers that work offline"],
-    tint: "var(--color-pink)",
   },
   stash: {
     slug: "stash",

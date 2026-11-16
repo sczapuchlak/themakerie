@@ -44,7 +44,7 @@ export function ContinueCreating() {
         </p>
 
         <div className="relative mt-7 flex flex-wrap gap-3">
-          <Link href="/projects" className="btn btn-primary">
+          <Link href="/patterns" className="btn btn-primary">
             <Plus />
             Start a project
           </Link>

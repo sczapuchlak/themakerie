@@ -1,5 +1,5 @@
 export type NavItem = {
-  href: "/" | "/patterns" | "/projects" | "/stash" | "/gallery";
+  href: "/" | "/patterns" | "/stash" | "/gallery";
   label: string;
   icon: "home" | "patterns" | "projects" | "stash" | "gallery";
 };
@@ -7,7 +7,6 @@ export type NavItem = {
 export const primaryNav: readonly NavItem[] = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/patterns", label: "Patterns", icon: "patterns" },
-  { href: "/projects", label: "Projects", icon: "projects" },
   { href: "/stash", label: "Stash", icon: "stash" },
   { href: "/gallery", label: "Gallery", icon: "gallery" },
 ];
@@ -17,5 +16,7 @@ export const SIDEBAR_STORAGE_KEY = "makerie:sidebar";
 
 export function isActivePath(pathname: string, href: NavItem["href"]) {
   if (href === "/") return pathname === "/";
+  // Projects live inside the Pattern Library.
+  if (href === "/patterns" && pathname.startsWith("/projects/")) return true;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
