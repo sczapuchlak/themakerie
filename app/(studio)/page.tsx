@@ -2,8 +2,10 @@ import { Collection } from "@/components/home/collection";
 import { ContinueCreating } from "@/components/home/continue-creating";
 import { Masthead } from "@/components/home/masthead";
 import { StudioIndex } from "@/components/home/studio-index";
+import { requireOwner } from "@/lib/auth/dal";
 
-export default function Home() {
+export default async function Home() {
+  await requireOwner();
   return (
     <div className="gutter mx-auto w-full max-w-[80rem]">
       <Masthead />

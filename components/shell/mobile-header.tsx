@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
+import { AccountMenu } from "./account-menu";
 
 /** Slim midnight brand bar for phones; the sidebar replaces it from md up. */
 export function MobileHeader() {
@@ -6,7 +8,9 @@ export function MobileHeader() {
     <header className="tone-midnight relative bg-midnight pt-[env(safe-area-inset-top)] md:hidden">
       <div className="gutter flex h-14 items-center justify-between">
         <Wordmark />
-        <p className="eyebrow">by Muse</p>
+        <Suspense fallback={<p className="eyebrow">by Muse</p>}>
+          <AccountMenu variant="compact" />
+        </Suspense>
       </div>
       <div
         aria-hidden="true"

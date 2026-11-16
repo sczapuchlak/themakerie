@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
+import { AccountMenu } from "./account-menu";
 import { PrimaryNav } from "./primary-nav";
 import { SidebarToggle } from "./sidebar-toggle";
 
@@ -44,6 +46,9 @@ export function Sidebar() {
           <br />
           by Muse
         </p>
+        <Suspense fallback={null}>
+          <AccountMenu variant="sidebar" />
+        </Suspense>
         <SidebarToggle />
       </div>
     </aside>
