@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { NumberedHeading } from "@/components/editorial/foil";
+import { PatternMaterials } from "@/components/stash/pattern-materials";
+import { getPatternMaterials } from "@/lib/stash/data";
 import { CoverArt } from "@/components/library/cover-art";
 import { CoverAura, PaletteStrip } from "@/components/library/cover-palette";
 import { Progress } from "@/components/library/library-landing";
@@ -16,10 +18,11 @@ export const metadata: Metadata = { title: "Pattern" };
 
 export default async function PatternPage({ params }: PageProps<"/patterns/[patternId]">) {
   const { patternId } = await params;
-  const [{ pattern: p, coverUrl, sources, sections, projects }, folders, crafts] = await Promise.all([
+  const [{ pattern: p, coverUrl, sources, sections, projects }, folders, crafts, materials] = await Promise.all([
     getPattern(patternId),
     getFolders(),
     getCrafts(),
+    getPatternMaterials(patternId),
   ]);
 
   const craft = crafts.find((c) => c.slug === p.craft)?.name ?? p.craft;
@@ -217,6 +220,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
       {/* Reference: sources + details beside the optional instructions */}
       <div className="mt-12 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-6 lg:order-2">
+          <PatternMaterials patternId={p.id} requirements={materials} />
           <section id="sources" aria-labelledby="sources-title" className="card-plain scroll-mt-6 rounded-card p-5">
             <h2 id="sources-title" className="font-semibold text-strong">
               Pattern files <span className="font-mono text-sm font-normal text-muted">{sources.length}</span>

@@ -92,7 +92,7 @@ export function validateUpload(kind: "pdf" | "image", type: string, size: number
 /** Storage paths always start with the owner id (enforced by storage RLS). */
 export function storagePath(
   ownerId: string,
-  scope: "patterns" | "projects",
+  scope: "patterns" | "projects" | "stash",
   parentId: string,
   fileName: string,
   unique: string,

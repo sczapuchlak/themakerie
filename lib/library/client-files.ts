@@ -13,7 +13,7 @@ export async function sha256Hex(file: Blob): Promise<string> {
 /** Uploads with progress (fetch can't report upload progress; XHR can). */
 export async function uploadFile(
   file: Blob,
-  target: { scope: "patterns" | "projects"; parentId: string; kind: "pdf" | "image" | "cover"; fileName: string },
+  target: { scope: "patterns" | "projects" | "stash"; parentId: string; kind: "pdf" | "image" | "cover"; fileName: string },
   onProgress?: (fraction: number) => void,
 ): Promise<string> {
   const prepared = await prepareUpload({

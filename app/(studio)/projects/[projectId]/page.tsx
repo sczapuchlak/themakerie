@@ -10,6 +10,8 @@ import { getProject } from "@/lib/library/data";
 import { sinceLabel } from "@/lib/library/format";
 import { computeProgress, NOTE_KINDS } from "@/lib/workspace/model";
 import { buildSnapshot, workspaceClient } from "@/lib/workspace/server";
+import { ProjectSuppliesSection } from "@/components/stash/project-supplies";
+import { getPickableStock, getProjectSupplies } from "@/lib/stash/data";
 
 export const metadata: Metadata = { title: "Project" };
 
@@ -17,7 +19,11 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
   const { projectId } = await params;
   const { project, coverUrl, pattern, photos } = await getProject(projectId);
   const { supabase } = await workspaceClient();
-  const snapshot = (await buildSnapshot(supabase, projectId))!;
+  const [snapshot, supplies, pickable] = await Promise.all([
+    buildSnapshot(supabase, projectId).then((x) => x!),
+    getProjectSupplies(projectId, project.pattern_id),
+    getPickableStock(),
+  ]);
   const summary = computeProgress(snapshot);
   const open = snapshot.sessions.find((s) => s.status !== "finished");
   const latestPhoto = [...photos].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]?.url ?? null;
@@ -99,7 +105,8 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
       <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-10">
           <PhotoGallery projectId={project.id} coverPath={project.cover_path} photos={photos} n={1} />
-          <Journal snapshot={snapshot} n={photos.length ? 2 : 1} />
+          <ProjectSuppliesSection n={photos.length ? 2 : 1} projectId={project.id} projectName={project.name} supplies={supplies} pickable={pickable} />
+          <Journal snapshot={snapshot} n={photos.length ? 3 : 2} />
         </div>
         <aside className="space-y-4">
           <ProgressCard snapshot={snapshot} />

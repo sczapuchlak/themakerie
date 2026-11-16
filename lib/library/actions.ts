@@ -95,7 +95,7 @@ export async function deleteFolder(id: string): Promise<Result> {
 
 /** Signed, single-use upload target inside the owner's own prefix. */
 export async function prepareUpload(input: {
-  scope: "patterns" | "projects";
+  scope: "patterns" | "projects" | "stash";
   parentId: string;
   fileName: string;
   size: number;
@@ -122,17 +122,19 @@ export async function discardUploads(paths: string[]): Promise<Result> {
   const { owner, supabase } = await ctx();
   const mine = paths.filter((p) => typeof p === "string" && p.startsWith(`${owner.id}/`)).slice(0, 100);
   if (!mine.length) return { ok: true };
-  const [sources, photos, patternCovers, projectCovers] = await Promise.all([
+  const [sources, photos, patternCovers, projectCovers, stashPhotos] = await Promise.all([
     supabase.from("pattern_sources").select("storage_path").in("storage_path", mine),
     supabase.from("project_photos").select("storage_path").in("storage_path", mine),
     supabase.from("patterns").select("cover_path").in("cover_path", mine),
     supabase.from("projects").select("cover_path").in("cover_path", mine),
+    supabase.from("stash_photos").select("storage_path").in("storage_path", mine),
   ]);
   const used = new Set([
     ...(sources.data ?? []).map((r) => r.storage_path),
     ...(photos.data ?? []).map((r) => r.storage_path),
     ...(patternCovers.data ?? []).map((r) => r.cover_path),
     ...(projectCovers.data ?? []).map((r) => r.cover_path),
+    ...(stashPhotos.data ?? []).map((r) => r.storage_path),
   ]);
   const orphaned = mine.filter((p) => !used.has(p));
   if (orphaned.length) await supabase.storage.from(BUCKET).remove(orphaned);
