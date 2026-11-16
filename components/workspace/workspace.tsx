@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CoverAura, usePalette } from "@/components/library/cover-palette";
 import { Sheet } from "@/components/ui/sheet";
 import { statusLabel } from "@/lib/library/constants";
 import { idb } from "@/lib/workspace/idb";
@@ -137,6 +138,7 @@ export function Workspace({ initial }: { initial: Snapshot }) {
     void registerServiceWorker();
   }, []);
 
+  const palette = usePalette(s.pattern?.coverUrl, s.pattern?.cover_path);
   const doc = docs.find((d) => d.id === viewId);
   const undoLabel = ws.undoStack.at(-1)?.label ?? null;
   const syncDot = !ws.sync.online ? "bg-white/40" : ws.sync.pending ? "bg-peach" : "bg-neon";
@@ -165,7 +167,7 @@ export function Workspace({ initial }: { initial: Snapshot }) {
   };
 
   const tabs = (
-    <div role="tablist" aria-label="Tools" className="flex gap-1 overflow-x-auto border-b border-line px-3 no-scrollbar">
+    <div role="tablist" aria-label="Tools" className="flex gap-1.5 overflow-x-auto border-b border-line px-3 py-2 no-scrollbar">
       {PANELS.map((p) => (
         <button
           key={p.id}
@@ -173,7 +175,7 @@ export function Workspace({ initial }: { initial: Snapshot }) {
           type="button"
           aria-selected={panel === p.id}
           onClick={() => setPanel(p.id)}
-          className="min-h-11 shrink-0 border-b-2 border-transparent px-3 text-sm font-semibold text-muted aria-selected:border-midnight aria-selected:text-strong"
+          className="min-h-10 shrink-0 rounded-full px-3.5 text-sm font-semibold text-muted transition-colors hover:bg-selected aria-selected:bg-midnight aria-selected:text-neon"
         >
           {p.label}
         </button>
@@ -182,9 +184,14 @@ export function Workspace({ initial }: { initial: Snapshot }) {
   );
 
   return (
-    <div className="tone-midnight fixed inset-0 flex flex-col bg-midnight" data-testid="workspace">
-      {/* Top bar */}
-      <header className="flex items-center gap-2 border-b border-white/10 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] [@media(max-height:500px)]:py-1">
+    <div
+      className="tone-midnight fixed inset-0 isolate flex flex-col bg-midnight"
+      data-testid="workspace"
+      style={{ "--ws-a": palette[0], "--ws-b": palette[1] ?? palette[0], "--ws-c": palette[2] ?? palette[0] } as React.CSSProperties}
+    >
+      {/* Top bar, tinted by the pattern's cover */}
+      <header className="relative isolate flex items-center gap-2 overflow-hidden border-b border-white/10 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] [@media(max-height:500px)]:py-1">
+        <CoverAura src={s.pattern?.coverUrl ?? null} cacheKey={s.pattern?.cover_path ?? null} className="opacity-70" />
         <Link href={`/projects/${s.project.id}`} aria-label="Leave Work Mode" className="grid size-11 shrink-0 place-items-center rounded-full text-xl text-white hover:bg-white/10">
           ←
         </Link>
@@ -263,7 +270,8 @@ export function Workspace({ initial }: { initial: Snapshot }) {
 
         {/* Desktop tools */}
         <aside className="tone-paper hidden w-[26rem] shrink-0 flex-col border-l border-white/10 bg-paper lg:flex" aria-label="Tools">
-          <div className="tone-midnight bg-midnight p-3">
+          <div className="tone-midnight relative isolate overflow-hidden bg-midnight p-3">
+            <div aria-hidden="true" className="absolute -top-16 -right-10 -z-10 size-56 rounded-full opacity-40 blur-3xl" style={{ background: "var(--ws-a)" }} />
             <CounterDock counters={s.counters} selectedId={selected} onSelect={setSelected} onTap={tap} onUndo={undo} undoLabel={undoLabel} />
           </div>
           {tabs}

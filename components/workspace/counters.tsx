@@ -55,10 +55,18 @@ export function CounterDock({
         <span className="max-w-full truncate text-[0.7rem] font-semibold tracking-[0.14em] text-white/70 uppercase">
           {c.name} {counters.length > 1 && <span aria-hidden="true">▾</span>}
         </span>
-        <span className="font-mono text-[2.4rem] leading-none font-semibold text-white tabular-nums" data-testid="counter-value">
+        <span
+          className="font-mono text-[2.4rem] leading-none font-semibold text-white tabular-nums [text-shadow:0_0_18px_rgb(182_255_0/0.35)] [@media(max-height:500px)]:text-[1.9rem]"
+          data-testid="counter-value"
+        >
           {c.value}
           {c.target ? <span className="text-lg text-white/50">/{c.target}</span> : null}
         </span>
+        {c.target ? (
+          <span className="mt-1.5 block h-1 w-16 overflow-hidden rounded-full bg-white/15" aria-hidden="true">
+            <span className="block h-full rounded-full bg-neon" style={{ width: `${Math.min(100, (c.value / c.target) * 100)}%` }} />
+          </span>
+        ) : null}
       </button>
       <button
         type="button"

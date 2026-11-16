@@ -8,10 +8,26 @@ import { LibrarySearch } from "./library-search";
 
 /* ------------------------------------------------------------ masthead */
 
-export function LibraryMasthead({ total }: { total: number }) {
+export function LibraryMasthead({ total, covers = [] }: { total: number; covers?: RecentPattern[] }) {
+  const fan = covers.filter((c) => c.coverUrl).slice(0, 3);
   return (
-    <header className="tone-midnight surface-midnight relative mt-4 overflow-hidden rounded-panel p-6 sm:p-8 md:mt-8">
+    <header className="tone-midnight surface-midnight relative isolate mt-4 overflow-hidden rounded-panel p-6 sm:p-8 md:mt-8">
       <div className="tech-grid pointer-events-none absolute inset-0 text-white/[0.05]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -top-24 right-10 -z-10 size-80 rounded-full bg-pink/35 blur-[90px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 right-1/3 -z-10 size-72 rounded-full bg-laser/25 blur-[90px]" />
+      {fan.length > 0 && (
+        <div aria-hidden="true" className="pointer-events-none absolute top-1/2 right-8 hidden h-[15rem] w-[17rem] -translate-y-1/2 lg:block xl:right-14">
+          {fan.map((c, i) => (
+            <div
+              key={c.id}
+              className="absolute top-0 aspect-[3/4] h-full overflow-hidden rounded-card shadow-2xl ring-1 ring-white/25"
+              style={{ right: i * 46, transform: `rotate(${[6, -4, -12][i]}deg) translateY(${i * 6}px)`, zIndex: 3 - i }}
+            >
+              <CoverArt url={c.coverUrl} title={c.title} craft={c.craft} />
+            </div>
+          ))}
+        </div>
+      )}
       <div className="relative flex flex-wrap items-end justify-between gap-5">
         <div>
           <SectionLabel>Your collection</SectionLabel>
@@ -25,12 +41,19 @@ export function LibraryMasthead({ total }: { total: number }) {
             </span>
           </p>
         </div>
-        <Link href="/patterns/new" className="btn btn-primary">
+        <Link href="/patterns/new" className={`btn btn-primary ${fan.length ? "lg:hidden" : ""}`}>
           <span aria-hidden="true">＋</span> Add pattern
         </Link>
       </div>
-      <div className="relative mt-6 max-w-xl">
-        <LibrarySearch action="/patterns/all" />
+      <div className="relative mt-6 flex max-w-2xl flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1 basis-72">
+          <LibrarySearch action="/patterns/all" />
+        </div>
+        {fan.length > 0 && (
+          <Link href="/patterns/new" className="btn btn-primary hidden lg:inline-flex">
+            <span aria-hidden="true">＋</span> Add pattern
+          </Link>
+        )}
       </div>
     </header>
   );
@@ -48,10 +71,13 @@ export function InProgress({ projects }: { projects: ActiveProject[] }) {
         {projects.length > 0 && <span className="eyebrow">{projects.length} active</span>}
       </div>
       {projects.length === 0 ? (
-        <p className="surface-panel mt-3 rounded-card px-5 py-4 text-sm text-body">
-          Nothing on the needles. Open a pattern and choose <strong className="text-strong">Start new project</strong> — it
-          will show up here.
-        </p>
+        <div className="relative mt-3 overflow-hidden rounded-card bg-gradient-to-r from-[#fde7f6] via-[#ece9ff] to-[#dff8ff] px-5 py-5 ring-1 ring-white/70">
+          <div aria-hidden="true" className="absolute -top-10 -right-6 size-40 rounded-full bg-pink/30 blur-2xl" />
+          <p className="relative text-body">
+            <span className="font-display-tight text-xl text-strong">Nothing on the needles.</span>{" "}
+            Pick a pattern below and choose <strong className="text-strong">Start a project</strong> — it&rsquo;ll wait for you here.
+          </p>
+        </div>
       ) : (
         <ul className="no-scrollbar -mx-[var(--gutter)] mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-[var(--gutter)] px-[var(--gutter)] pb-2 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
           {projects.map((p) => (
@@ -174,5 +200,43 @@ export function FolderGlyph({ color }: { color?: string | null }) {
       <path d="M2 4a2 2 0 0 1 2-2h8l3 3h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z" fill={hex} />
       <path d="M2 9h28" stroke="#081638" strokeOpacity=".25" />
     </svg>
+  );
+}
+
+/* ------------------------------------------------------- recently added */
+
+export type RecentPattern = { id: string; title: string; craft: string; designer: string | null; coverUrl: string | null };
+
+/** A shelf of covers: the collection should look like the patterns in it. */
+export function RecentShelf({ patterns }: { patterns: RecentPattern[] }) {
+  if (!patterns.length) return null;
+  return (
+    <section aria-labelledby="recent" className="mt-10">
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 id="recent" className="font-display-tight text-[1.65rem]">
+          Recently <span className="font-serif font-normal tracking-normal text-vivid italic">added</span>
+        </h2>
+        <Link href="/patterns/all" className="text-sm font-semibold text-accent hover:underline">
+          See all →
+        </Link>
+      </div>
+      <ul className="no-scrollbar -mx-[var(--gutter)] mt-4 flex snap-x gap-5 overflow-x-auto scroll-px-[var(--gutter)] px-[var(--gutter)] pt-2 pb-6">
+        {patterns.map((p, i) => (
+          <li key={p.id} className="w-[11.5rem] shrink-0 snap-start sm:w-[13rem]">
+            <Link href={`/patterns/${p.id}`} className="group block">
+              <div
+                className={`relative aspect-[3/4] overflow-hidden rounded-card shadow-[0_18px_40px_-18px_rgb(8_22_56/0.55)] ring-1 ring-white/60 transition-transform duration-300 ease-soft group-hover:-translate-y-1.5 group-hover:rotate-0 ${
+                  i % 2 ? "rotate-[1.5deg]" : "-rotate-[1.5deg]"
+                }`}
+              >
+                <CoverArt url={p.coverUrl} title={p.title} craft={p.craft} />
+              </div>
+              <h3 className="mt-3 line-clamp-2 font-semibold leading-snug text-strong">{p.title}</h3>
+              {p.designer && <p className="truncate text-sm text-muted">{p.designer}</p>}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

@@ -82,7 +82,7 @@ export type ActiveProject = {
 
 export async function getLibraryHome() {
   const { supabase } = await session();
-  const [folders, all, unsorted, active] = await Promise.all([
+  const [folders, all, unsorted, active, recentRows] = await Promise.all([
     supabase.from("folder_overview").select("*").order("sort_order").order("name"),
     supabase.from("patterns").select("id", { count: "exact", head: true }).is("archived_at", null),
     supabase.from("patterns").select("id", { count: "exact", head: true }).is("archived_at", null).is("folder_id", null),
@@ -93,13 +93,19 @@ export async function getLibraryHome() {
       .order("last_worked_at", { ascending: false, nullsFirst: false })
       .order("updated_at", { ascending: false })
       .limit(24),
+    supabase
+      .from("patterns")
+      .select("id, title, craft, designer, cover_path")
+      .is("archived_at", null)
+      .order("created_at", { ascending: false })
+      .limit(10),
   ]);
   if (folders.error) throw folders.error;
 
   const projects = active.data ?? [];
   const urls = await signPaths(
     supabase,
-    projects.flatMap((p) => [p.cover_path, p.pattern?.cover_path]),
+    [...projects.flatMap((p) => [p.cover_path, p.pattern?.cover_path]), ...(recentRows.data ?? []).map((r) => r.cover_path)],
   );
   const inProgress: ActiveProject[] = projects.map((p) => ({
     id: p.id,
@@ -115,6 +121,7 @@ export async function getLibraryHome() {
     allCount: all.count ?? 0,
     unsortedCount: unsorted.count ?? 0,
     inProgress,
+    recent: (recentRows.data ?? []).map((r) => ({ ...r, coverUrl: urls.get(r.cover_path ?? "") ?? null })),
   };
 }
 

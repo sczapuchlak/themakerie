@@ -14,7 +14,6 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
   const { project, coverUrl, pattern, photos, sources } = await getProject(projectId);
   const { supabase } = await workspaceClient();
   const snapshot = (await buildSnapshot(supabase, projectId))!;
-  const pdf = sources.find((s) => s.kind === "pdf" && s.fileUrl);
   const otherLinks = sources.filter((s) => s.kind === "website" || s.kind === "video");
 
   return (
@@ -58,11 +57,6 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
             <Link href={`/projects/${project.id}/work`} className="btn btn-primary" data-testid="open-work-mode">
               Open Work Mode
             </Link>
-            {pdf?.fileUrl && (
-              <a href={pdf.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-                Open pattern PDF
-              </a>
-            )}
             {otherLinks.slice(0, 2).map((s) => (
               <a key={s.id} href={s.url ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
                 {s.kind === "video" ? "Watch tutorial" : "Pattern page"}

@@ -150,7 +150,7 @@ export type Snapshot = {
   /** Server time the snapshot was built; newer snapshots win. */
   loadedAt: string;
   project: ProjectState;
-  pattern: { id: string; title: string; designer: string | null; craft: string } | null;
+  pattern: { id: string; title: string; designer: string | null; craft: string; cover_path: string | null; coverUrl: string | null } | null;
   sources: Source[];
   sections: Section[];
   completedSteps: string[];

@@ -409,13 +409,25 @@ export function Reader({
       <div
         ref={scroller}
         onScroll={onScroll}
-        className="relative min-h-0 flex-1 overflow-auto overscroll-contain bg-[#0d1a40] [touch-action:pan-x_pan-y]"
+        className="relative min-h-0 flex-1 overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
+        style={{
+          background:
+            "radial-gradient(120% 70% at 50% -15%, color-mix(in srgb, var(--ws-a, #494AF4) 30%, transparent), transparent 60%), radial-gradient(80% 60% at 100% 110%, color-mix(in srgb, var(--ws-b, #F477D3) 24%, transparent), transparent 65%), #0a1433",
+        }}
         data-testid="reader-scroller"
       >
-        {loading && <p className="p-6 text-sm text-white/70" role="status">Opening {doc.title}…</p>}
+        {loading && (
+          <div className="flex justify-center p-6" role="status" aria-label={`Opening ${doc.title}`}>
+            <div className="aspect-[8.5/11] w-full max-w-xl animate-pulse rounded-sm bg-white/10 p-8">
+              {Array.from({ length: 9 }, (_, i) => (
+                <div key={i} className="mb-4 h-3 rounded-full bg-white/15" style={{ width: `${55 + ((i * 37) % 40)}%` }} />
+              ))}
+            </div>
+          </div>
+        )}
         {error && (
-          <div className="m-6 rounded-card bg-white/95 p-5 text-midnight" role="alert">
-            <p className="font-semibold">{error}</p>
+          <div className="tone-paper m-6 rounded-card bg-white p-5" role="alert">
+            <p className="font-semibold text-strong">{error}</p>
             <button type="button" className="btn btn-secondary mt-3" onClick={() => location.reload()}>
               Try again
             </button>

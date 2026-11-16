@@ -23,7 +23,7 @@ export async function buildSnapshot(supabase: WorkspaceClient, projectId: string
   const patternId = p.pattern_id;
   const [pattern, sources, sections, steps, completions, counters, sessions, photos, notes, milestones, events, reader, bookmarks] =
     await Promise.all([
-      patternId ? supabase.from("patterns").select("id, title, designer, craft").eq("id", patternId).maybeSingle() : null,
+      patternId ? supabase.from("patterns").select("id, title, designer, craft, cover_path").eq("id", patternId).maybeSingle() : null,
       patternId ? supabase.from("pattern_sources").select("*").eq("pattern_id", patternId).order("sort_order").order("created_at") : null,
       patternId ? supabase.from("pattern_sections").select("*").eq("pattern_id", patternId).order("position") : null,
       patternId
@@ -42,7 +42,11 @@ export async function buildSnapshot(supabase: WorkspaceClient, projectId: string
 
   const sourceRows = sources?.data ?? [];
   const photoRows = photos.data ?? [];
-  const urls = await signPaths(supabase, [...sourceRows.map((s) => s.storage_path), ...photoRows.map((ph) => ph.storage_path)], 6 * 3600);
+  const urls = await signPaths(
+    supabase,
+    [...sourceRows.map((s) => s.storage_path), ...photoRows.map((ph) => ph.storage_path), pattern?.data?.cover_path],
+    6 * 3600,
+  );
 
   return {
     loadedAt: new Date().toISOString(),
@@ -64,7 +68,7 @@ export async function buildSnapshot(supabase: WorkspaceClient, projectId: string
       workspace: (p.workspace ?? {}) as Snapshot["project"]["workspace"],
       pattern_id: p.pattern_id,
     },
-    pattern: pattern?.data ?? null,
+    pattern: pattern?.data ? { ...pattern.data, coverUrl: urls.get(pattern.data.cover_path ?? "") ?? null } : null,
     sources: sourceRows.map(
       (s): Source => ({
         id: s.id,

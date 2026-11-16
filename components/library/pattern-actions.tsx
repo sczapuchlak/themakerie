@@ -154,7 +154,19 @@ export function DeletePattern({ id, title, projectCount }: { id: string; title: 
   );
 }
 
-export function StartProject({ patternId, patternTitle, primary = false }: { patternId: string; patternTitle: string; primary?: boolean }) {
+export function StartProject({
+  patternId,
+  patternTitle,
+  primary = false,
+  className,
+  label = "＋ Start new project",
+}: {
+  patternId: string;
+  patternTitle: string;
+  primary?: boolean;
+  className?: string;
+  label?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(patternTitle);
@@ -166,8 +178,8 @@ export function StartProject({ patternId, patternTitle, primary = false }: { pat
   const [pending, start] = useTransition();
   return (
     <>
-      <button type="button" className={primary ? "btn btn-primary" : "btn btn-ink"} onClick={() => setOpen(true)}>
-        ＋ Start new project
+      <button type="button" className={className ?? (primary ? "btn btn-primary" : "btn btn-ink")} onClick={() => setOpen(true)}>
+        {label}
       </button>
       <Sheet
         open={open}

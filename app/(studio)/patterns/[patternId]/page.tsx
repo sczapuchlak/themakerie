@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { compareProjects, formatDuration } from "@/lib/workspace/model";
 import { CoverArt } from "@/components/library/cover-art";
+import { CoverAura, PaletteStrip } from "@/components/library/cover-palette";
 import { ArchivePattern, ContinueChooser, DeletePattern, FavoriteToggle, MovePattern, StartProject } from "@/components/library/pattern-actions";
 import { Progress } from "@/components/library/library-landing";
 import { StatusPill } from "@/components/library/status-pill";
@@ -55,48 +56,89 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
         </ol>
       </nav>
 
-      {/* 1–3: identity and primary actions */}
-      <header className="tone-midnight surface-midnight relative mt-3 grid overflow-hidden rounded-panel md:grid-cols-[18rem_1fr]">
-        <div className="aspect-[4/3] md:aspect-auto md:min-h-[22rem]">
-          <CoverArt url={coverUrl} title={p.title} craft={p.craft} priority />
-        </div>
-        <div className="relative p-6 sm:p-8">
-          <div className="tech-grid pointer-events-none absolute inset-0 text-white/[0.04]" />
-          <p className="eyebrow relative">
-            {craft}
-            {difficultyLabel(p.difficulty) ? ` · ${difficultyLabel(p.difficulty)}` : ""}
-            {p.archived_at ? " · Archived" : ""}
-          </p>
-          <h1 className="relative mt-3 font-display-tight text-[clamp(2.2rem,5vw,3.6rem)]">{p.title}</h1>
-          {(p.designer || p.source_name) && (
-            <p className="relative mt-2 text-body">
-              {p.designer && <>by <strong className="text-strong">{p.designer}</strong></>}
-              {p.designer && p.source_name ? " · " : ""}
-              {p.source_name}
-            </p>
-          )}
-          <div className="relative mt-6 flex flex-wrap gap-3">
-            {active.length === 1 && (
-              <Link href={`/projects/${active[0].id}/work`} className="btn btn-primary">
-                Continue {active[0].name}
-              </Link>
+      {/* 1–3: identity and primary actions — tinted by the cover's own colours */}
+      <header className="tone-midnight relative isolate mt-3 overflow-hidden rounded-panel bg-midnight shadow-[0_30px_80px_-30px_rgb(8_22_56/0.6)]">
+        <CoverAura src={coverUrl} cacheKey={p.cover_path} />
+        <div className="grid items-center gap-8 p-6 sm:p-10 md:grid-cols-[minmax(0,19rem)_1fr] lg:gap-12">
+          <div className="relative mx-auto w-full max-w-[12rem] sm:max-w-[19rem] md:mx-0">
+            <div className="absolute inset-4 translate-y-6 rounded-card bg-black/40 blur-2xl" aria-hidden="true" />
+            <div className="relative aspect-[3/4] -rotate-2 overflow-hidden rounded-card shadow-2xl ring-1 ring-white/25 transition-transform duration-500 ease-soft hover:rotate-0">
+              <CoverArt url={coverUrl} title={p.title} craft={p.craft} priority />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-[0.14em] text-white uppercase ring-1 ring-white/15">
+                <span className="size-2 rounded-full bg-neon shadow-[0_0_10px_var(--neon-glow)]" />
+                {craft}
+              </span>
+              {p.difficulty && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/15" title={`Difficulty ${p.difficulty} of 5`}>
+                  <span className="flex gap-0.5" aria-hidden="true">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <span key={n} className={`h-2.5 w-1.5 rounded-full ${n <= (p.difficulty ?? 0) ? "bg-pink" : "bg-white/20"}`} />
+                    ))}
+                  </span>
+                  {difficultyLabel(p.difficulty)}
+                </span>
+              )}
+              {p.category && <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/15">{p.category}</span>}
+              {p.archived_at && <span className="rounded-full bg-peach px-3 py-1 text-xs font-semibold text-midnight">Archived</span>}
+            </div>
+            <h1 className="mt-4 font-display-tight text-[clamp(2.4rem,5.6vw,4.6rem)] leading-[0.95] text-white">{p.title}</h1>
+            {(p.designer || p.source_name) && (
+              <p className="mt-3 text-lg text-white/80">
+                {p.designer && (
+                  <>
+                    by <span className="font-serif text-[1.35em] text-white italic">{p.designer}</span>
+                  </>
+                )}
+                {p.designer && p.source_name ? " · " : ""}
+                {p.source_name}
+              </p>
             )}
-            {active.length > 1 && <ContinueChooser projects={active} />}
-            {pdfs[0]?.fileUrl && (
-              <a href={pdfs[0].fileUrl} target="_blank" rel="noopener noreferrer" className={active.length ? "btn btn-secondary" : "btn btn-primary"}>
-                Open PDF{pdfs.length > 1 ? ` (${pdfs.length})` : ""}
-              </a>
-            )}
-            {stepCount > 0 && (
-              <a href="#instructions" className="btn btn-secondary">
-                Instructions
-              </a>
-            )}
-            {images.length > 0 && (
-              <a href="#sources" className="btn btn-secondary">
-                Photos ({images.length})
-              </a>
-            )}
+
+            <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+              {[
+                pdfs[0]?.page_count ? ["Pages", String(pdfs[0].page_count)] : null,
+                ["Projects", String(projects.length)],
+                stepCount ? ["Steps", String(stepCount)] : null,
+                images.length ? ["Photos", String(images.length)] : null,
+              ]
+                .filter((x): x is string[] => Boolean(x))
+                .map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="text-[0.7rem] font-semibold tracking-[0.16em] text-white/55 uppercase">{k}</dt>
+                    <dd className="font-mono text-2xl font-semibold text-white">{v}</dd>
+                  </div>
+                ))}
+            </dl>
+
+            <div className="mt-6">
+              <PaletteStrip src={coverUrl} cacheKey={p.cover_path} />
+            </div>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              {active.length === 1 && (
+                <Link href={`/projects/${active[0].id}/work`} className="btn btn-primary">
+                  Continue {active[0].name}
+                </Link>
+              )}
+              {active.length > 1 && <ContinueChooser projects={active} />}
+              {(pdfs.length > 0 || images.length > 0) && (
+                <Link href={`/patterns/${p.id}/read`} className={active.length ? "btn btn-secondary" : "btn btn-primary"} data-testid="read-pattern">
+                  Read pattern
+                </Link>
+              )}
+              {active.length === 0 && (
+                <StartProject patternId={p.id} patternTitle={p.title} className="btn bg-white text-midnight hover:bg-white/90" label="＋ Start a project" />
+              )}
+              {stepCount > 0 && (
+                <a href="#instructions" className="btn btn-secondary">
+                  Instructions
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -227,7 +269,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
                       <span className="block truncate text-sm font-semibold text-strong">{s.title || s.file_name || s.url}</span>
                       <span className="block truncate text-xs text-muted">
                         {s.kind === "pdf"
-                          ? [formatBytes(s.size_bytes), s.page_count ? `${s.page_count} pages` : null, "Open / download"].filter(Boolean).join(" · ")
+                          ? [formatBytes(s.size_bytes), s.page_count ? `${s.page_count} pages` : null, "Download original"].filter(Boolean).join(" · ")
                           : s.url}
                       </span>
                     </span>
@@ -250,7 +292,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
               ))}
             </ul>
           )}
-          <p className="mt-3 text-xs text-muted">Files are private to you. Downloading a PDF does not make it available offline in the app yet.</p>
+          <p className="mt-3 text-xs text-muted">Files are private to you. To craft offline, open a project in Work Mode → Offline.</p>
         </section>
       </div>
 

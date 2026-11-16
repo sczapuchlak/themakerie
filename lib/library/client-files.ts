@@ -72,11 +72,15 @@ export async function toCoverJpeg(source: Blob | HTMLCanvasElement, max = 1200):
  * Reads page count and renders page 1 of a PDF (PDF.js, loaded on demand).
  * Fails soft: a PDF that can't be read is still uploaded and saved.
  */
-/** URL of the bundled PDF.js worker (also cached for offline use). */
-export const pdfWorkerSrc = () => new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+/**
+ * PDF.js "legacy" build: the modern build needs ES2025 Iterator helpers that
+ * Safari before 18.4 lacks ("Can't find variable: Iterator"); legacy
+ * bundles the polyfills. Worker and library must come from the same build.
+ */
+export const pdfWorkerSrc = () => new URL("pdfjs-dist/legacy/build/pdf.worker.min.mjs", import.meta.url).toString();
 
 export async function loadPdfjs() {
-  const pdfjs = await import("pdfjs-dist");
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
   pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerSrc();
   return pdfjs;
 }
