@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { LocalTime } from "@/components/ui/local-time";
 import { ViewTransition } from "react";
 import { FoilStrip, NumberedHeading } from "@/components/editorial/foil";
 import { FOLDER_COLOR_HEX, type FolderColor } from "@/lib/library/constants";
 import type { ActiveProject, CollectionPreviews, FolderOverview, RecentPattern } from "@/lib/library/data";
-import { plural, sinceLabel } from "@/lib/library/format";
+import { plural } from "@/lib/library/format";
 import { formatDuration } from "@/lib/workspace/model";
 import { CoverArt } from "./cover-art";
 import { FolderButton } from "./folder-dialog";
@@ -261,7 +262,7 @@ function Stats({ p, dark = false }: { p: ActiveProject; dark?: boolean }) {
   const items = [
     p.trackedSeconds > 0 ? `${formatDuration(p.trackedSeconds)} tracked` : null,
     p.sessionCount > 0 ? plural(p.sessionCount, "session") : null,
-    p.last_worked_at ? `Last worked ${sinceLabel(p.last_worked_at)}` : "Not started yet",
+    p.last_worked_at ? <LocalTime key="lw" iso={p.last_worked_at} preset="since" prefix="Last worked " /> : "Not started yet",
   ].filter(Boolean);
   return (
     <p className={`flex flex-wrap gap-x-3 gap-y-1 text-sm ${dark ? "text-white/70" : "text-muted"}`}>

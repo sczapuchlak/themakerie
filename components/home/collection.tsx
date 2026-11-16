@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { LocalTime } from "@/components/ui/local-time";
 import { CoverArt } from "@/components/library/cover-art";
 import type { ActiveProject, RecentPattern } from "@/lib/library/data";
-import { sinceLabel } from "@/lib/library/format";
 
 /**
  * Home collection — Active projects / Recent patterns. One calm, luminous
@@ -81,7 +81,7 @@ export function Collection({
                     <span className="block truncate font-semibold text-strong group-hover:underline">{p.name}</span>
                     <span className="block truncate text-sm text-muted">
                       {p.pattern?.title ?? "No pattern"}
-                      {p.last_worked_at ? ` · ${sinceLabel(p.last_worked_at)}` : ""}
+                      {p.last_worked_at ? <LocalTime iso={p.last_worked_at} preset="since" prefix=" · " /> : ""}
                     </span>
                     <span className="mt-1.5 block h-1.5 max-w-[16rem] overflow-hidden rounded-full bg-midnight/10">
                       <span className="block h-full rounded-full bg-cobalt" style={{ width: `${p.progress ?? 0}%` }} />

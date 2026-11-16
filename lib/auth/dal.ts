@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -30,6 +31,8 @@ export type Access =
  * *account id* is the authorized owner. Memoized per request.
  */
 export const getAccess = cache(async (): Promise<Access> => {
+  // Session checks read the clock (token expiry); they are always per-request.
+  await connection();
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "unconfigured" };
 

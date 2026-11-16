@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalTime } from "@/components/ui/local-time";
 import Link from "next/link";
 import { CoverArt } from "@/components/library/cover-art";
 import { CoverAura } from "@/components/library/cover-palette";
@@ -7,7 +8,6 @@ import { DeleteProject } from "@/components/library/project-panel";
 import { EditProject, FloatingWorkButton, PhotoGallery, ProgressCard, StatusMenu } from "@/components/project/project-dashboard";
 import { Journal, ProjectInsights } from "@/components/workspace/journal";
 import { getProject } from "@/lib/library/data";
-import { sinceLabel } from "@/lib/library/format";
 import { computeProgress, NOTE_KINDS } from "@/lib/workspace/model";
 import { buildSnapshot, workspaceClient } from "@/lib/workspace/server";
 import { ProjectSuppliesSection } from "@/components/stash/project-supplies";
@@ -84,7 +84,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[proj
                   ? "● Session running now"
                   : "Session paused"
                 : project.last_worked_at
-                  ? `Last worked ${sinceLabel(project.last_worked_at)}`
+                  ? <LocalTime iso={project.last_worked_at} preset="since" prefix="Last worked " />
                   : project.status === "finished"
                     ? "Finished — well done."
                     : "Ready when you are."}

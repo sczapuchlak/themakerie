@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { LocalTime } from "@/components/ui/local-time";
 import { HeroFoil } from "@/components/art/holo-art";
 import { SectionLabel } from "@/components/editorial/section-label";
 import { CoverArt } from "@/components/library/cover-art";
 import type { HomeFeatured } from "@/lib/library/data";
-import { sinceLabel } from "@/lib/library/format";
 import { LiveTimer } from "./live-timer";
 import { chartKey, StitchChart } from "./stitch-chart";
 
@@ -159,7 +159,7 @@ function Featured({ p }: { p: HomeFeatured }) {
               {" · "}
             </>
           )}
-          {p.last_worked_at ? `last worked ${sinceLabel(p.last_worked_at)}` : "ready when you are"}
+          {p.last_worked_at ? <LocalTime iso={p.last_worked_at} preset="since" prefix="last worked " /> : "ready when you are"}
         </p>
 
         <div className="relative mt-5 max-w-[30rem]">

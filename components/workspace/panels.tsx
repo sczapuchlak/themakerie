@@ -188,7 +188,7 @@ function NoteItem({ note, ws, editing, onEdit }: { note: Note; ws: Workspace; ed
       <div className="flex items-center gap-2 text-xs">
         <span className="rounded-full bg-selected px-2 py-0.5 font-semibold text-strong">{label}</span>
         {note.pinned && <span aria-label="Pinned">📌</span>}
-        <LocalTime iso={note.created_at} format={(d) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" })} className="text-muted" />
+        <LocalTime iso={note.created_at} preset="shortDate" className="text-muted" />
         <span className="ml-auto flex gap-1">
           <button type="button" className="min-h-9 rounded-full px-2 text-muted hover:bg-selected" onClick={() => save({ pinned: !note.pinned })}>
             {note.pinned ? "Unpin" : "Pin"}
@@ -417,7 +417,7 @@ export function InsightsGrid({ ws }: { ws: Workspace }) {
   const s = ws.state;
   const summary = computeProgress(s);
   const i = computeInsights(s, summary);
-  const since = i.lastWorkedAt ? <LocalTime iso={i.lastWorkedAt} format={(d) => relative(d.toISOString())} /> : "—";
+  const since = i.lastWorkedAt ? <LocalTime iso={i.lastWorkedAt} preset="since" /> : "—";
   return (
     <section aria-label="Insights">
       <h3 className="eyebrow">Insights · tracked time</h3>
@@ -450,14 +450,6 @@ function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function relative(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const h = Math.floor(diff / 3_600_000);
-  if (h < 1) return "within the hour";
-  if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  return d === 1 ? "yesterday" : `${d} days ago`;
-}
 
 function Sparkline({ points }: { points: { at: string; percent: number }[] }) {
   const t0 = new Date(points[0].at).getTime();

@@ -88,7 +88,8 @@ export default async function SupplyPage({ params }: PageProps<"/stash/[itemId]"
               </Link>
             </div>
             <p className="text-xs font-semibold tracking-[0.16em] text-white/60 uppercase">
-              {familyLabel(item.family!)} · {item.category}
+              {familyLabel(item.family!)}
+              {item.category && item.category.toLowerCase() !== familyLabel(item.family!).toLowerCase() ? ` · ${item.category}` : ""}
               {item.archived_at ? " · Archived" : ""}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2 pr-24">
@@ -163,7 +164,7 @@ export default async function SupplyPage({ params }: PageProps<"/stash/[itemId]"
                   const amount = m.measure && q ? fromBase(Math.abs(q), m.measure as Measure, m.measure === "length" ? "m" : "g", unit) : "";
                   return (
                     <li key={m.id} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 px-4 py-2.5 text-sm">
-                      <LocalTime iso={m.created_at} format={(d) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" })} className="w-14 shrink-0 font-mono text-xs text-muted" />
+                      <LocalTime iso={m.created_at} preset="shortDate" className="w-14 shrink-0 font-mono text-xs text-muted" />
                       <span className="font-semibold text-strong">{KIND_LABEL[m.kind] ?? m.kind}</span>
                       {amount && <span className="text-body">{amount}</span>}
                       {m.project && (

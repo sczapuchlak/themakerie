@@ -205,7 +205,8 @@ function AllocationSheet({ action, pending, error, onClose, run }: { action: { t
   const measure = a.measure ?? "count";
   const unitLabel = a.item?.unit_label ?? "unit";
   const [value, setValue] = useState(type === "release" ? amountPlain(a.reserved_quantity, measure) : "");
-  const [unit, setUnit] = useState<EntryUnit>(measure === "mass" ? "g" : measure === "length" ? "m" : "unit");
+  // Leftovers of skein-counted yarn are usually weighed, so start in grams.
+  const [unit, setUnit] = useState<EntryUnit>(measure === "mass" || (type === "leftover" && measure === "count") ? "g" : measure === "length" ? "m" : "unit");
   const [leftMeasure, setLeftMeasure] = useState<"mass" | "length" | "count">(measure === "count" ? "mass" : (measure as "mass" | "length"));
   const [known, setKnown] = useState(true);
   const [note, setNote] = useState("");

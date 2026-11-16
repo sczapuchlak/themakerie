@@ -344,12 +344,15 @@ export async function getPickableStock() {
   const cards = await toCards(supabase, overview.data ?? [], options.locations);
   return cards.map((c) => ({
     ...c,
+    // Whole units first, then partials, then measured leftovers — the natural default to pick from.
     holdings: (holdings.data ?? [])
       .filter((h) => h.item_id === c.id)
+      .sort((a, b) => rank(a) - rank(b) || a.created_at.localeCompare(b.created_at))
       .map((h) => ({ ...h, locationName: locationLabel(options.locations, h.lot?.location_id) })),
   }));
 }
 export type Pickable = Awaited<ReturnType<typeof getPickableStock>>;
+const rank = (h: { measure: string; condition: string }) => (h.measure === "count" || h.measure === "piece" ? (h.condition === "full" ? 0 : 1) : 2);
 
 export async function getPatternMaterials(patternId: string) {
   const { supabase } = await session();

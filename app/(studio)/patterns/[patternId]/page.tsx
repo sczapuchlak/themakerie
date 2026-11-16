@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalTime } from "@/components/ui/local-time";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { NumberedHeading } from "@/components/editorial/foil";
@@ -11,7 +12,7 @@ import { ArchivePattern, ContinueChooser, DeletePattern, FavoriteToggle, MovePat
 import { StatusPill } from "@/components/library/status-pill";
 import { CRAFT_FIELDS, difficultyLabel, formatBytes } from "@/lib/library/constants";
 import { folderPath, getCrafts, getFolders, getPattern } from "@/lib/library/data";
-import { plural, sinceLabel } from "@/lib/library/format";
+import { plural } from "@/lib/library/format";
 import { compareProjects, formatDuration } from "@/lib/workspace/model";
 
 export const metadata: Metadata = { title: "Pattern" };
@@ -194,7 +195,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
                         {pr.status === "finished" && pr.finished_on
                           ? `Finished ${new Date(pr.finished_on).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
                           : pr.last_worked_at
-                            ? `Last worked ${sinceLabel(pr.last_worked_at)}`
+                            ? <LocalTime iso={pr.last_worked_at} preset="since" prefix="Last worked " />
                             : "Not started yet"}
                       </p>
                       <div className="mt-auto flex gap-2 pt-4">

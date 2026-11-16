@@ -6,7 +6,6 @@ import { NumberedHeading } from "@/components/editorial/foil";
 import { LocalTime } from "@/components/ui/local-time";
 import { Sheet } from "@/components/ui/sheet";
 import { syncWorkspace } from "@/lib/workspace/actions";
-import { sinceLabel } from "@/lib/library/format";
 import { computeInsights, computeProgress, formatDuration, NOTE_KINDS, sessionSeconds, type Op, type Session, type Snapshot } from "@/lib/workspace/model";
 
 const op = <T extends Omit<Op, "opId" | "at">>(o: T) => ({ ...o, opId: crypto.randomUUID(), at: new Date().toISOString() }) as unknown as Op;
@@ -55,8 +54,8 @@ export function Journal({ snapshot, n = 1 }: { snapshot: Snapshot; n?: number })
             return (
               <li key={s.id} className="relative flex gap-4">
                 <div className="relative z-10 grid w-[3.2rem] shrink-0 place-items-center self-start rounded-tile bg-white py-1.5 text-center shadow-sm ring-1 ring-line">
-                  <LocalTime iso={s.started_at} format={(x) => x.toLocaleDateString(undefined, { month: "short" })} className="text-[0.6rem] font-semibold tracking-[0.12em] text-muted uppercase" />
-                  <LocalTime iso={s.started_at} format={(x) => String(x.getDate())} className="font-display-tight text-xl leading-none text-strong" />
+                  <LocalTime iso={s.started_at} preset="month" className="text-[0.6rem] font-semibold tracking-[0.12em] text-muted uppercase" />
+                  <LocalTime iso={s.started_at} preset="day" className="font-display-tight text-xl leading-none text-strong" />
                 </div>
                 <article className="card-plain min-w-0 flex-1 rounded-card p-4">
                   <div className="flex flex-wrap items-center gap-2">
@@ -69,7 +68,7 @@ export function Journal({ snapshot, n = 1 }: { snapshot: Snapshot; n?: number })
                         +{gained}% · {s.progress_before}% → {s.progress_after}%
                       </span>
                     )}
-                    <LocalTime iso={s.started_at} format={(x) => x.toLocaleDateString(undefined, { weekday: "long" })} className="text-xs text-muted" />
+                    <LocalTime iso={s.started_at} preset="weekday" className="text-xs text-muted" />
                     <button type="button" className="ml-auto min-h-9 text-sm font-semibold text-accent hover:underline" onClick={() => setEditing(s)}>
                       Edit
                     </button>
@@ -284,7 +283,7 @@ export function ProjectInsights({ snapshot }: { snapshot: Snapshot }) {
           <div key={k}>
             <dt className="text-xs text-muted">{k}</dt>
             <dd className={`mt-0.5 font-semibold ${idx < 3 ? "iridescent-text font-display-tight text-[1.5rem] leading-tight" : "text-strong"}`} data-testid={`insight-${k}`}>
-              {v === "__since__" && i.lastWorkedAt ? <LocalTime iso={i.lastWorkedAt} format={(x) => sinceLabel(x.toISOString()) ?? "—"} /> : v}
+              {v === "__since__" && i.lastWorkedAt ? <LocalTime iso={i.lastWorkedAt} preset="since" /> : v}
             </dd>
           </div>
         ))}
