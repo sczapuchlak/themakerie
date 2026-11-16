@@ -1,26 +1,401 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   The Makerie — Cosmic Pop Editorial · Holographic Maximalism
+   Midnight blue. Liquid iridescence. Electric neon lime. Powerful type.
+   --------------------------------------------------------------------------
+   Color roles
+     Midnight #081638     STRUCTURE — sidebar, mobile chrome, the focal
+                          editorial block, strong type. Never the default
+                          fill for content.
+     Holographic spectrum MATERIAL & ATMOSPHERE — cobalt, holo pink, laser
+                          blue, ultraviolet, aqua, solar peach. Broad blended
+                          fields on the canvas; detailed foil/chrome artwork
+                          (assets/art) only in the focal hero.
+     Neon lime #B6FF00    SIGNAL — primary CTA, active nav, focus, progress,
+                          small graphic jolts. Placed on midnight, where it
+                          is fluorescent; never a surface.
+
+   Tones
+     Default tokens (:root) are for paper and the luminous foil canvas:
+     midnight type, cobalt accents. `tone-midnight` re-maps the same tokens
+     for dark regions (white type, laser-blue accents, neon focus).
+
+   Visual hierarchy
+     1 · Hero          deep foil + chrome knot + midnight type (one per screen)
+     2 · Canvas        smooth luminous colour fields — energy without detail
+     3 · Panels & nav  defined, calm, readable
+
+   Surfaces
+     surface-panel     cool luminous frost — functional sections
+     surface-paper     opaque reading surface — long-form pages
+     surface-glass     selective translucent glass (masthead, pills)
+     surface-midnight  structural midnight with a lifted corner
+     holo-spectrum     flat spectrum band for slivers and rules
+
+   Graphic utilities
+     chrome-text       liquid-chrome gradient type (on midnight)
+     numeral-outline   outlined editorial numerals
+     tech-grid         thin technical grid lines
+   ========================================================================== */
+
+/* Sidebar collapsed state is an attribute on <html>, restored before paint. */
+@custom-variant sidebar-collapsed (&:where([data-sidebar="collapsed"] *));
+
+/* -- Static palette ------------------------------------------------------- */
+@theme {
+  /* Structure */
+  --color-midnight: #081638;
+  --color-midnight-lift: #142a6b;
+
+  /* Holographic spectrum */
+  --color-cobalt: #494af4;
+  --color-pink: #f477d3;
+  --color-laser: #48d7f5;
+  --color-ultraviolet: #ae8aff;
+  --color-aqua: #8ef0d3;
+  --color-peach: #ffbc91;
+
+  /* Signal */
+  --color-neon: #b6ff00;
+
+  /* Neutrals */
+  --color-paper: #fbfaff;
+
+  /* Geometry */
+  --radius-panel: 2rem;
+  --radius-card: 1.5rem;
+  --radius-tile: 0.875rem;
+
+  --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* -- Semantic tokens: paper & foil (default) ------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  --canvas: #e9e6fb;
+
+  --text-strong: #081638;
+  --text-body: #26305a;
+  --text-muted: #4a5380;
+
+  --line: rgb(8 22 56 / 0.12);
+  --line-strong: rgb(8 22 56 / 0.28);
+  --control: #ffffff;
+  --selected: rgb(8 22 56 / 0.08);
+
+  --accent: #494af4;
+  --vivid: #cf2fa5;
+  --spark: #494af4;
+  --focus: #081638;
+
+  --neon: #b6ff00;
+  --on-neon: #081638;
+  --neon-glow: rgb(182 255 0 / 0.55);
+
+  /* Iridescent type — deep stops for ≥4.5:1 on paper */
+  --iris-1: #3536d8;
+  --iris-2: #c01f97;
+  --iris-3: #b1501c;
+  --iris-4: #0d7aa3;
+
+  /* Layout */
+  --gutter: clamp(1rem, 3.5vw, 2.5rem);
+  --tabbar-height: 3.75rem;
+  --sidebar-w: 15rem;
 }
 
+:root[data-sidebar="collapsed"] {
+  --sidebar-w: 4.75rem;
+}
+
+/* -- Semantic tokens: midnight regions ------------------------------------ */
+@utility tone-midnight {
+  color-scheme: dark;
+  color: var(--text-body);
+
+  --text-strong: #ffffff;
+  --text-body: #d6dcf6;
+  --text-muted: #a3acd8;
+
+  --line: rgb(255 255 255 / 0.14);
+  --line-strong: rgb(255 255 255 / 0.34);
+  --control: rgb(255 255 255 / 0.08);
+  --selected: rgb(255 255 255 / 0.1);
+
+  --accent: #48d7f5;
+  --vivid: #f477d3;
+  --spark: #b6ff00;
+  --focus: #b6ff00;
+
+  --iris-1: #ae8aff;
+  --iris-2: #f477d3;
+  --iris-3: #ffbc91;
+  --iris-4: #48d7f5;
+}
+
+/* -- Tailwind bridges ----------------------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: var(--canvas);
+  --color-strong: var(--text-strong);
+  --color-body: var(--text-body);
+  --color-muted: var(--text-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-vivid: var(--vivid);
+  --color-selected: var(--selected);
+  --color-spark: var(--spark);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-bricolage), var(--font-geist-sans), sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* -- Base ----------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--text-body);
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--text-strong);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--color-neon);
+    color: var(--color-midnight);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* -- Layout --------------------------------------------------------------- */
+
+/* Page gutter that respects iPhone landscape safe areas. */
+@utility gutter {
+  padding-left: max(var(--gutter), env(safe-area-inset-left));
+  padding-right: max(var(--gutter), env(safe-area-inset-right));
+}
+
+/* -- Typography ----------------------------------------------------------- */
+
+/* Editorial display face: heavy, slightly condensed, tight. */
+@utility font-display-tight {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 84%;
+  letter-spacing: -0.035em;
+  line-height: 0.9;
+}
+
+/* Small uppercase mono micro-label. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@utility iridescent-text {
+  background-image: linear-gradient(
+    100deg,
+    var(--iris-1),
+    var(--iris-2) 36%,
+    var(--iris-3) 66%,
+    var(--iris-4)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Liquid-chrome type — bright bands with a holographic core. On midnight. */
+@utility chrome-text {
+  background-image: linear-gradient(
+    176deg,
+    #ffffff 0%,
+    #dfe4ff 30%,
+    #48d7f5 46%,
+    #ae8aff 58%,
+    #f477d3 70%,
+    #ffffff 92%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Outlined editorial numerals. */
+@utility numeral-outline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 84%;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1.5px currentColor;
+}
+
+/* -- Surfaces ------------------------------------------------------------- */
+
+/* Opaque reading surface — primary content. */
+@utility surface-paper {
+  background-color: var(--color-paper);
+  box-shadow:
+    inset 0 0 0 1px rgb(8 22 56 / 0.08),
+    inset 0 1px 0 #ffffff,
+    0 22px 44px -26px rgb(8 22 56 / 0.5);
+}
+
+/* Selective translucent glass over the foil. Opaque enough to read on. */
+@utility surface-glass {
+  background-color: rgb(251 250 255 / 0.8);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.85),
+    0 18px 40px -26px rgb(8 22 56 / 0.45);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+
+  @supports not (backdrop-filter: blur(1px)) {
+    background-color: var(--color-paper);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-paper);
+  }
+}
+
+/* Structural midnight with a lifted corner. Pair with tone-midnight. */
+@utility surface-midnight {
+  background-color: var(--color-midnight);
+  background-image: radial-gradient(
+    110% 90% at 0% 0%,
+    var(--color-midnight-lift),
+    var(--color-midnight) 58%
+  );
+}
+
+/* Functional panel — cool, luminous frost with a defined edge. Holds a
+   section's heading and content together (no card-in-card). */
+@utility surface-panel {
+  background-image: linear-gradient(
+    180deg,
+    rgb(251 251 255 / 0.9) 0%,
+    rgb(241 243 255 / 0.82) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.9),
+    0 0 0 1px rgb(8 22 56 / 0.06),
+    0 24px 48px -30px rgb(8 22 56 / 0.45);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-image: none;
+    background-color: var(--color-paper);
+  }
+}
+
+/* The holographic spectrum as a flat CSS band — for slivers and rules, so
+   the detailed foil texture stays reserved for the hero. */
+@utility holo-spectrum {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-ultraviolet),
+    var(--color-pink) 22%,
+    var(--color-peach) 42%,
+    var(--color-aqua) 60%,
+    var(--color-laser) 78%,
+    var(--color-cobalt)
+  );
+}
+
+/* Thin technical grid. Colour follows `currentColor`. */
+@utility tech-grid {
+  background-image:
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* -- Controls ------------------------------------------------------------- */
+
+@utility btn {
+  display: inline-flex;
+  min-height: 2.875rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding-inline: 1.375rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+  white-space: nowrap;
+  transition:
+    transform 200ms var(--ease-soft),
+    background-color 200ms var(--ease-soft),
+    box-shadow 200ms var(--ease-soft),
+    border-color 200ms var(--ease-soft);
+}
+
+/* The one primary action per view — neon lime, midnight type. */
+@utility btn-primary {
+  background-color: var(--neon);
+  color: var(--on-neon);
+  box-shadow:
+    inset 0 0 0 1px rgb(8 22 56 / 0.18),
+    0 0 0 0 var(--neon-glow);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 0 0 1px rgb(8 22 56 / 0.18),
+      0 0 24px 2px var(--neon-glow);
+  }
+}
+
+@utility btn-secondary {
+  background-color: var(--control);
+  border: 1px solid var(--line-strong);
+  color: var(--text-strong);
+
+  &:hover {
+    border-color: var(--text-strong);
+  }
+}
+
+/* -- Motion (only when the user allows it) -------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .sidebar-transition {
+    transition: grid-template-columns 260ms var(--ease-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary:hover {
+    transform: none;
+  }
 }
