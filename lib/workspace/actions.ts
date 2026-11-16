@@ -381,6 +381,17 @@ async function applyServerOp(supabase: WorkspaceClient, ownerId: string, project
       return check(error) ?? OK;
     }
 
+    case "supply.use": {
+      if (!isUuid(op.allocationId)) return rejected("Malformed supply change.");
+      const amount = int(op.amount, 1, 2_000_000_000);
+      if (!amount) return rejected("Malformed supply change.");
+      const { data: alloc } = await supabase.from("stash_allocations").select("project_id").eq("id", op.allocationId).maybeSingle();
+      if (!alloc || alloc.project_id !== projectId) return rejected("That supply is no longer linked to this project.");
+      const { error } = await supabase.rpc("stash_use", { p_id: op.opId, p_allocation: op.allocationId, p_amount: amount, p_note: str(op.note, 1000) ?? undefined });
+      if (error?.code === "23514") return rejected(`Couldn't record use offline: ${error.message}. Nothing was deducted — check the stash.`);
+      return check(error, { P0002: "That supply was removed, so the use wasn't recorded." }) ?? OK;
+    }
+
     default:
       return rejected("Unknown change.");
   }

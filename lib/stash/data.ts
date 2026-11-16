@@ -282,7 +282,7 @@ export async function getKits() {
   const { supabase } = await session();
   const [kits, items, options] = await Promise.all([
     supabase.from("stash_kits").select("*, project:projects(id, name)").order("updated_at", { ascending: false }),
-    supabase.from("stash_kit_items").select("kit_id, item_id, quantity, holding_id"),
+    supabase.from("stash_kit_items").select("id, kit_id, item_id, quantity, holding_id"),
     getStashOptions(),
   ]);
   const ids = [...new Set((items.data ?? []).map((i) => i.item_id))];
@@ -356,4 +356,27 @@ export async function getPatternMaterials(patternId: string) {
   if (!isUuid(patternId)) return [];
   const { data } = await supabase.from("pattern_materials").select("id, kind, family, description, quantity_text").eq("pattern_id", patternId).order("position");
   return data ?? [];
+}
+
+/** Places and collections with how many supplies each holds. */
+export async function getOrganisation() {
+  const { supabase } = await session();
+  const [options, lots, items] = await Promise.all([
+    getStashOptions(),
+    supabase.from("stash_lots").select("item_id, location_id"),
+    supabase.from("stash_items").select("id, collection_id").is("archived_at", null),
+  ]);
+  const byLocation = new Map<string, Set<string>>();
+  for (const l of lots.data ?? []) {
+    if (!l.location_id) continue;
+    const set = byLocation.get(l.location_id) ?? new Set<string>();
+    set.add(l.item_id);
+    byLocation.set(l.location_id, set);
+  }
+  const byCollection = new Map<string, number>();
+  for (const i of items.data ?? []) if (i.collection_id) byCollection.set(i.collection_id, (byCollection.get(i.collection_id) ?? 0) + 1);
+  return {
+    locations: options.locations.map((l) => ({ ...l, count: byLocation.get(l.id)?.size ?? 0 })),
+    collections: options.collections.map((c) => ({ ...c, count: byCollection.get(c.id) ?? 0 })),
+  };
 }

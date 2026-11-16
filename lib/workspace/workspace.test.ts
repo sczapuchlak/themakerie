@@ -200,3 +200,13 @@ test("formatDuration", () => {
   assert.equal(formatDuration(59), "0m");
   assert.equal(formatDuration(3725, true), "1:02:05");
 });
+
+test("offline supply use draws on this project's reservation first", () => {
+  const base = snapshot({
+    supplies: [
+      { id: "a1", item_id: "i1", kind: "material", family: "yarn", name: "DK", color_code: null, color_hexes: [], unit_label: "skein", measure: "count", entry_unit: "unit", reserved: 2, used: 0, planned: 4, free: 3, location: null },
+    ],
+  });
+  const s = replay(base, [op({ type: "supply.use", allocationId: "a1", amount: 3, note: null })]);
+  assert.deepEqual([s.supplies![0].reserved, s.supplies![0].used, s.supplies![0].free], [0, 3, 2]);
+});

@@ -120,6 +120,26 @@ export type Source = {
 export type Step = { id: string; body: string; row_start: number | null; row_end: number | null; repeat_count: number | null; position: number };
 export type Section = { id: string; title: string; notes: string | null; position: number; steps: Step[] };
 
+/** A stash supply linked to this project (for Work Mode, incl. offline). */
+export type SupplySnap = {
+  id: string; // allocation id
+  item_id: string;
+  kind: "material" | "tool";
+  family: string;
+  name: string;
+  color_code: string | null;
+  color_hexes: string[];
+  unit_label: string;
+  measure: "count" | "mass" | "length" | "piece" | null;
+  entry_unit: string;
+  reserved: number;
+  used: number;
+  planned: number | null;
+  /** Free stock in the holding (not reserved by anyone) when the snapshot was taken. */
+  free: number;
+  location: string | null;
+};
+
 export type ProjectState = {
   id: string;
   name: string;
@@ -162,6 +182,8 @@ export type Snapshot = {
   progressEvents: ProgressEvent[];
   readerStates: ReaderState[];
   bookmarks: Bookmark[];
+  /** Optional: older offline snapshots won't have it. */
+  supplies?: SupplySnap[];
 };
 
 export type ProjectPatch = Partial<
@@ -210,6 +232,8 @@ export type Op = Base &
         path?: string;
       }
     | { type: "photo.delete"; id: string }
+    /** Record material used from the stash; idempotent by opId on the server. */
+    | { type: "supply.use"; allocationId: string; amount: number; note: string | null }
   );
 export type OpInput = Op extends infer O ? (O extends Op ? Omit<O, "opId" | "at"> : never) : never;
 
@@ -475,6 +499,15 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
       };
     case "photo.delete":
       return { ...s, photos: s.photos.filter((p) => p.id !== op.id) };
+    case "supply.use":
+      return {
+        ...s,
+        supplies: (s.supplies ?? []).map((x) => {
+          if (x.id !== op.allocationId) return x;
+          const fromReserved = Math.min(x.reserved, op.amount);
+          return { ...x, used: x.used + op.amount, reserved: x.reserved - fromReserved, free: Math.max(0, x.free - (op.amount - fromReserved)) };
+        }),
+      };
   }
 }
 

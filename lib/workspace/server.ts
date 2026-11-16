@@ -40,6 +40,13 @@ export async function buildSnapshot(supabase: WorkspaceClient, projectId: string
       supabase.from("project_bookmarks").select("*").eq("project_id", projectId).order("page"),
     ]);
 
+  // Stash supplies linked to the project (read in Work Mode, usable offline).
+  const { data: allocs } = await supabase
+    .from("stash_allocations")
+    .select("id, item_id, kind, measure, reserved_quantity, used_quantity, planned_quantity, status, item:stash_items(name, family, color_code, color_hexes, unit_label), holding:stash_holdings(quantity, reserved, entry_unit, lot:stash_lots(location:stash_locations(name)))")
+    .eq("project_id", projectId)
+    .in("status", ["planned", "active"]);
+
   const sourceRows = sources?.data ?? [];
   const photoRows = photos.data ?? [];
   const urls = await signPaths(
@@ -161,5 +168,22 @@ export async function buildSnapshot(supabase: WorkspaceClient, projectId: string
       guides: (r.guides ?? []) as Guide[],
     })),
     bookmarks: (bookmarks.data ?? []).map((b) => ({ id: b.id, source_id: b.source_id, page: b.page, y: b.y, label: b.label })),
+    supplies: (allocs ?? []).map((a) => ({
+      id: a.id,
+      item_id: a.item_id,
+      kind: a.kind as "material" | "tool",
+      family: a.item?.family ?? "other",
+      name: a.item?.name ?? "Supply",
+      color_code: a.item?.color_code ?? null,
+      color_hexes: a.item?.color_hexes ?? [],
+      unit_label: a.item?.unit_label ?? "unit",
+      measure: (a.measure as "count" | "mass" | "length" | "piece" | null) ?? null,
+      entry_unit: a.holding?.entry_unit ?? "unit",
+      reserved: a.reserved_quantity,
+      used: a.used_quantity,
+      planned: a.planned_quantity,
+      free: a.holding ? a.holding.quantity - a.holding.reserved : 0,
+      location: a.holding?.lot?.location?.name ?? null,
+    })),
   };
 }

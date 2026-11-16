@@ -11,7 +11,7 @@ import { computeProgress, openSession, readerStateFor, type Counter, type Reader
 import { registerServiceWorker } from "@/lib/workspace/offline";
 import { useWorkspace } from "@/lib/workspace/use-workspace";
 import { CounterDock, CounterList } from "./counters";
-import { NotesPanel, OfflinePanel, PhotosPanel, ProgressPanel, StepsPanel } from "./panels";
+import { NotesPanel, OfflinePanel, PhotosPanel, ProgressPanel, StepsPanel, SuppliesPanel } from "./panels";
 import { Reader, type ReaderDoc } from "./reader";
 import { FinishSession, RecoverSession, TimerControl } from "./session";
 
@@ -20,6 +20,7 @@ const PANELS = [
   { id: "steps", label: "Steps" },
   { id: "notes", label: "Notes" },
   { id: "progress", label: "Progress" },
+  { id: "supplies", label: "Supplies" },
   { id: "photos", label: "Photos" },
   { id: "offline", label: "Offline" },
 ] as const;
@@ -157,6 +158,8 @@ export function Workspace({ initial }: { initial: Snapshot }) {
         return <ProgressPanel ws={ws} />;
       case "photos":
         return <PhotosPanel ws={ws} openSessionId={open?.id ?? null} />;
+      case "supplies":
+        return <SuppliesPanel ws={ws} />;
       case "offline":
         return (
           <div className="space-y-6">

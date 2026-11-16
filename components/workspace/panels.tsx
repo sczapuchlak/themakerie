@@ -17,6 +17,7 @@ import {
 import { makeAvailableOffline, offlineStatus, removeOffline, type OfflineStatus } from "@/lib/workspace/offline";
 import { pdfWorkerSrc } from "@/lib/library/client-files";
 import { formatBytes } from "@/lib/library/constants";
+import { fromBase as stashFromBase, toBase as stashToBase } from "@/lib/stash/catalog";
 import type { Workspace } from "@/lib/workspace/use-workspace";
 import { capturePhotos } from "./session";
 
@@ -635,3 +636,92 @@ export function OfflinePanel({ ws }: { ws: Workspace }) {
     </div>
   );
 }
+
+/* ---------------------------------------------------------------- supplies */
+
+export function SuppliesPanel({ ws }: { ws: Workspace }) {
+  const supplies = ws.state.supplies ?? [];
+  const [open, setOpen] = useState<string | null>(null);
+  const [amount, setAmount] = useState("");
+  const [unit, setUnit] = useState<"unit" | "g" | "oz" | "m" | "yd">("unit");
+  const [note, setNote] = useState("");
+  if (!supplies.length) {
+    return (
+      <p className="text-sm text-muted">
+        No stash supplies linked yet. Add them on the{" "}
+        <Link href={`/projects/${ws.state.project.id}`} className="font-semibold text-accent underline">
+          project page
+        </Link>{" "}
+        to see and record them here — even offline.
+      </p>
+    );
+  }
+  const describe = (q: number, s: (typeof supplies)[number]) =>
+    s.measure ? fromBaseUnits(q, s.measure, s.entry_unit, s.unit_label) : String(q);
+  return (
+    <div className="space-y-3" data-testid="supplies-panel">
+      <p className="text-xs text-muted">Recording use works offline and syncs later — it&rsquo;s never deducted twice.</p>
+      <ul className="space-y-2">
+        {supplies.map((s) => (
+          <li key={s.id} className="rounded-card border border-line bg-white p-3">
+            <div className="flex items-center gap-3">
+              <span className="size-9 shrink-0 rounded-full ring-2 ring-white" style={{ background: s.color_hexes[0] ?? "#ae8aff" }} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-strong">
+                  {s.name}
+                  {s.color_code && <span className="ml-1 font-mono text-sm font-normal text-muted">#{s.color_code}</span>}
+                </p>
+                <p className="text-xs text-muted">
+                  {s.kind === "tool" ? "Tool · in use" : `${describe(s.reserved, s)} reserved · ${describe(s.used, s)} used`}
+                  {s.location ? ` · ⌖ ${s.location}` : ""}
+                </p>
+              </div>
+              {s.kind === "material" && s.measure && s.measure !== "piece" && (
+                <button
+                  type="button"
+                  className="btn btn-ink press !min-h-10 !px-3 !text-xs"
+                  onClick={() => {
+                    setOpen(open === s.id ? null : s.id);
+                    setAmount("");
+                    setUnit(s.measure === "mass" ? "g" : s.measure === "length" ? "m" : "unit");
+                  }}
+                  data-testid="ws-record-used"
+                >
+                  Record used
+                </button>
+              )}
+            </div>
+            {open === s.id && s.measure && (
+              <form
+                className="mt-3 flex flex-wrap items-center gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const n = Number(amount);
+                  if (!(n > 0)) return;
+                  const base = toBaseUnits(n, unit);
+                  ws.dispatch({ type: "supply.use", allocationId: s.id, amount: base, note: note.trim() || null });
+                  setOpen(null);
+                  setNote("");
+                }}
+              >
+                <input className="field w-24 !min-h-11" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Amount used" autoFocus data-testid="ws-used-amount" />
+                {(s.measure === "mass" ? (["g", "oz"] as const) : s.measure === "length" ? (["m", "yd"] as const) : (["unit"] as const)).map((u) => (
+                  <button key={u} type="button" className="chip !min-h-10" aria-pressed={unit === u} onClick={() => setUnit(u)}>
+                    {u === "unit" ? `${s.unit_label}s` : u}
+                  </button>
+                ))}
+                <input className="field min-w-0 flex-1 basis-40 !min-h-11" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" aria-label="Note" />
+                <button type="submit" className="btn btn-primary press !min-h-11" disabled={!(Number(amount) > 0)} data-testid="ws-confirm-used">
+                  Save
+                </button>
+              </form>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+const toBaseUnits = (v: number, unit: "unit" | "g" | "oz" | "m" | "yd") => stashToBase(v, unit).quantity;
+const fromBaseUnits = (q: number, measure: string, entry: string, label: string) => stashFromBase(q, measure as "count", entry, label);
