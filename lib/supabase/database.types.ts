@@ -45,6 +45,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"pattern_materials": {
+                  Row: {
+                    "created_at": string,"description": string,"family": string,"id": string,"kind": string,"notes": string | null,"owner_id": string,"pattern_id": string,"position": number,"quantity_text": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"description": string,"family"?: string,"id"?: string,"kind"?: string,"notes"?: string | null,"owner_id"?: string,"pattern_id": string,"position"?: number,"quantity_text"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"description"?: string,"family"?: string,"id"?: string,"kind"?: string,"notes"?: string | null,"owner_id"?: string,"pattern_id"?: string,"position"?: number,"quantity_text"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pattern_materials_pattern_id_fkey"
+      columns: ["pattern_id"]
+isOneToOne: false
+      referencedRelation: "pattern_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pattern_materials_pattern_id_fkey"
+      columns: ["pattern_id"]
+isOneToOne: false
+      referencedRelation: "patterns"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"pattern_sections": {
                   Row: {
                     "created_at": string,"id": string,"notes": string | null,"owner_id": string,"pattern_id": string,"position": number,"title": string
@@ -447,6 +473,348 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"stash_allocations": {
+                  Row: {
+                    "created_at": string,"holding_id": string | null,"id": string,"item_id": string,"kind": string,"measure": string | null,"note": string | null,"owner_id": string,"planned_quantity": number | null,"project_id": string,"requirement_id": string | null,"reserved_quantity": number,"status": string,"updated_at": string,"used_quantity": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"holding_id"?: string | null,"id"?: string,"item_id": string,"kind": string,"measure"?: string | null,"note"?: string | null,"owner_id"?: string,"planned_quantity"?: number | null,"project_id": string,"requirement_id"?: string | null,"reserved_quantity"?: number,"status"?: string,"updated_at"?: string,"used_quantity"?: number
+                  }
+                  Update: {
+                    "created_at"?: string,"holding_id"?: string | null,"id"?: string,"item_id"?: string,"kind"?: string,"measure"?: string | null,"note"?: string | null,"owner_id"?: string,"planned_quantity"?: number | null,"project_id"?: string,"requirement_id"?: string | null,"reserved_quantity"?: number,"status"?: string,"updated_at"?: string,"used_quantity"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_allocations_holding_id_fkey"
+      columns: ["holding_id"]
+isOneToOne: false
+      referencedRelation: "stash_holdings"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_allocations_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_item_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_allocations_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_allocations_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_allocations_requirement_id_fkey"
+      columns: ["requirement_id"]
+isOneToOne: false
+      referencedRelation: "pattern_materials"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_categories": {
+                  Row: {
+                    "created_at": string,"family": string,"id": string,"name": string,"owner_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"family": string,"id"?: string,"name": string,"owner_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"family"?: string,"id"?: string,"name"?: string,"owner_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"stash_collections": {
+                  Row: {
+                    "color": string | null,"created_at": string,"id": string,"name": string,"owner_id": string,"parent_id": string | null,"sort_order": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "color"?: string | null,"created_at"?: string,"id"?: string,"name": string,"owner_id"?: string,"parent_id"?: string | null,"sort_order"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "color"?: string | null,"created_at"?: string,"id"?: string,"name"?: string,"owner_id"?: string,"parent_id"?: string | null,"sort_order"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_collections_parent_id_fkey"
+      columns: ["parent_id"]
+isOneToOne: false
+      referencedRelation: "stash_collections"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_holdings": {
+                  Row: {
+                    "amount_known": boolean,"condition": string,"created_at": string,"entry_unit": string,"height_mm": number | null,"id": string,"item_id": string,"label": string | null,"lot_id": string,"measure": string,"owner_id": string,"quantity": number,"reserved": number,"updated_at": string,"width_mm": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount_known"?: boolean,"condition"?: string,"created_at"?: string,"entry_unit"?: string,"height_mm"?: number | null,"id"?: string,"item_id": string,"label"?: string | null,"lot_id": string,"measure": string,"owner_id"?: string,"quantity"?: number,"reserved"?: number,"updated_at"?: string,"width_mm"?: number | null
+                  }
+                  Update: {
+                    "amount_known"?: boolean,"condition"?: string,"created_at"?: string,"entry_unit"?: string,"height_mm"?: number | null,"id"?: string,"item_id"?: string,"label"?: string | null,"lot_id"?: string,"measure"?: string,"owner_id"?: string,"quantity"?: number,"reserved"?: number,"updated_at"?: string,"width_mm"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_holdings_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_item_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_holdings_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_holdings_lot_id_fkey"
+      columns: ["lot_id"]
+isOneToOne: false
+      referencedRelation: "stash_lots"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_items": {
+                  Row: {
+                    "archived_at": string | null,"brand": string | null,"category": string,"collection_id": string | null,"color_code": string | null,"color_families": (string)[],"color_hexes": (string)[],"color_name": string | null,"cover_path": string | null,"created_at": string,"family": string,"favorite": boolean,"id": string,"kind": string,"low_stock_threshold": number | null,"name": string,"notes": string | null,"owner_id": string,"product_line": string | null,"search_text": string,"specs": NonNullable<Json>,"tags": (string)[],"unit_label": string,"unit_length_cm": number | null,"unit_mass_dg": number | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "archived_at"?: string | null,"brand"?: string | null,"category": string,"collection_id"?: string | null,"color_code"?: string | null,"color_families"?: (string)[],"color_hexes"?: (string)[],"color_name"?: string | null,"cover_path"?: string | null,"created_at"?: string,"family": string,"favorite"?: boolean,"id"?: string,"kind": string,"low_stock_threshold"?: number | null,"name": string,"notes"?: string | null,"owner_id"?: string,"product_line"?: string | null,"search_text"?: string,"specs"?: NonNullable<Json>,"tags"?: (string)[],"unit_label"?: string,"unit_length_cm"?: number | null,"unit_mass_dg"?: number | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "archived_at"?: string | null,"brand"?: string | null,"category"?: string,"collection_id"?: string | null,"color_code"?: string | null,"color_families"?: (string)[],"color_hexes"?: (string)[],"color_name"?: string | null,"cover_path"?: string | null,"created_at"?: string,"family"?: string,"favorite"?: boolean,"id"?: string,"kind"?: string,"low_stock_threshold"?: number | null,"name"?: string,"notes"?: string | null,"owner_id"?: string,"product_line"?: string | null,"search_text"?: string,"specs"?: NonNullable<Json>,"tags"?: (string)[],"unit_label"?: string,"unit_length_cm"?: number | null,"unit_mass_dg"?: number | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_items_collection_id_fkey"
+      columns: ["collection_id"]
+isOneToOne: false
+      referencedRelation: "stash_collections"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_kit_items": {
+                  Row: {
+                    "created_at": string,"holding_id": string | null,"id": string,"item_id": string,"kit_id": string,"note": string | null,"owner_id": string,"quantity": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"holding_id"?: string | null,"id"?: string,"item_id": string,"kit_id": string,"note"?: string | null,"owner_id"?: string,"quantity"?: number | null
+                  }
+                  Update: {
+                    "created_at"?: string,"holding_id"?: string | null,"id"?: string,"item_id"?: string,"kit_id"?: string,"note"?: string | null,"owner_id"?: string,"quantity"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_kit_items_holding_id_fkey"
+      columns: ["holding_id"]
+isOneToOne: false
+      referencedRelation: "stash_holdings"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_kit_items_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_item_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_kit_items_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_kit_items_kit_id_fkey"
+      columns: ["kit_id"]
+isOneToOne: false
+      referencedRelation: "stash_kits"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_kits": {
+                  Row: {
+                    "color": string | null,"created_at": string,"id": string,"location_id": string | null,"name": string,"notes": string | null,"owner_id": string,"project_id": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "color"?: string | null,"created_at"?: string,"id"?: string,"location_id"?: string | null,"name": string,"notes"?: string | null,"owner_id"?: string,"project_id"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "color"?: string | null,"created_at"?: string,"id"?: string,"location_id"?: string | null,"name"?: string,"notes"?: string | null,"owner_id"?: string,"project_id"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_kits_location_id_fkey"
+      columns: ["location_id"]
+isOneToOne: false
+      referencedRelation: "stash_locations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_kits_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_locations": {
+                  Row: {
+                    "created_at": string,"id": string,"name": string,"notes": string | null,"owner_id": string,"parent_id": string | null,"sort_order": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"name": string,"notes"?: string | null,"owner_id"?: string,"parent_id"?: string | null,"sort_order"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"name"?: string,"notes"?: string | null,"owner_id"?: string,"parent_id"?: string | null,"sort_order"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_locations_parent_id_fkey"
+      columns: ["parent_id"]
+isOneToOne: false
+      referencedRelation: "stash_locations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_lots": {
+                  Row: {
+                    "condition": string | null,"created_at": string,"currency": string | null,"dye_lot": string | null,"id": string,"item_id": string,"location_id": string | null,"notes": string | null,"owner_id": string,"price_cents": number | null,"purchased_on": string | null,"source": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "condition"?: string | null,"created_at"?: string,"currency"?: string | null,"dye_lot"?: string | null,"id"?: string,"item_id": string,"location_id"?: string | null,"notes"?: string | null,"owner_id"?: string,"price_cents"?: number | null,"purchased_on"?: string | null,"source"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "condition"?: string | null,"created_at"?: string,"currency"?: string | null,"dye_lot"?: string | null,"id"?: string,"item_id"?: string,"location_id"?: string | null,"notes"?: string | null,"owner_id"?: string,"price_cents"?: number | null,"purchased_on"?: string | null,"source"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_lots_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_item_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_lots_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_lots_location_id_fkey"
+      columns: ["location_id"]
+isOneToOne: false
+      referencedRelation: "stash_locations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_movements": {
+                  Row: {
+                    "allocation_id": string | null,"created_at": string,"delta_quantity": number,"delta_reserved": number,"holding_id": string | null,"id": string,"item_id": string,"kind": string,"measure": string | null,"note": string | null,"owner_id": string,"project_id": string | null,"quantity_after": number | null,"reserved_after": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "allocation_id"?: string | null,"created_at"?: string,"delta_quantity"?: number,"delta_reserved"?: number,"holding_id"?: string | null,"id": string,"item_id": string,"kind": string,"measure"?: string | null,"note"?: string | null,"owner_id"?: string,"project_id"?: string | null,"quantity_after"?: number | null,"reserved_after"?: number | null
+                  }
+                  Update: {
+                    "allocation_id"?: string | null,"created_at"?: string,"delta_quantity"?: number,"delta_reserved"?: number,"holding_id"?: string | null,"id"?: string,"item_id"?: string,"kind"?: string,"measure"?: string | null,"note"?: string | null,"owner_id"?: string,"project_id"?: string | null,"quantity_after"?: number | null,"reserved_after"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_movements_holding_id_fkey"
+      columns: ["holding_id"]
+isOneToOne: false
+      referencedRelation: "stash_holdings"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_movements_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_item_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_movements_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_movements_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_photos": {
+                  Row: {
+                    "created_at": string,"file_name": string | null,"id": string,"item_id": string,"mime_type": string | null,"owner_id": string,"size_bytes": number | null,"storage_path": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"file_name"?: string | null,"id"?: string,"item_id": string,"mime_type"?: string | null,"owner_id"?: string,"size_bytes"?: number | null,"storage_path": string
+                  }
+                  Update: {
+                    "created_at"?: string,"file_name"?: string | null,"id"?: string,"item_id"?: string,"mime_type"?: string | null,"owner_id"?: string,"size_bytes"?: number | null,"storage_path"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_photos_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_item_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_photos_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_items"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stash_wants": {
+                  Row: {
+                    "brand": string | null,"color": string | null,"created_at": string,"currency": string | null,"family": string,"id": string,"item_id": string | null,"list": string,"merchant": string | null,"name": string,"needed_quantity": number | null,"notes": string | null,"owner_id": string,"price_cents": number | null,"priority": number,"project_id": string | null,"received_quantity": number,"size": string | null,"status": string,"unit_label": string | null,"updated_at": string,"url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "brand"?: string | null,"color"?: string | null,"created_at"?: string,"currency"?: string | null,"family"?: string,"id"?: string,"item_id"?: string | null,"list"?: string,"merchant"?: string | null,"name": string,"needed_quantity"?: number | null,"notes"?: string | null,"owner_id"?: string,"price_cents"?: number | null,"priority"?: number,"project_id"?: string | null,"received_quantity"?: number,"size"?: string | null,"status"?: string,"unit_label"?: string | null,"updated_at"?: string,"url"?: string | null
+                  }
+                  Update: {
+                    "brand"?: string | null,"color"?: string | null,"created_at"?: string,"currency"?: string | null,"family"?: string,"id"?: string,"item_id"?: string | null,"list"?: string,"merchant"?: string | null,"name"?: string,"needed_quantity"?: number | null,"notes"?: string | null,"owner_id"?: string,"price_cents"?: number | null,"priority"?: number,"project_id"?: string | null,"received_quantity"?: number,"size"?: string | null,"status"?: string,"unit_label"?: string | null,"updated_at"?: string,"url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_wants_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_item_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_wants_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stash_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "stash_wants_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -496,6 +864,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"stash_item_overview": {
+                  Row: {
+                    "active_allocations": number | null,"archived_at": string | null,"brand": string | null,"category": string,"collection_id": string | null,"color_code": string | null,"color_families": (string)[],"color_hexes": (string)[],"color_name": string | null,"cover_path": string | null,"created_at": string,"family": string,"favorite": boolean,"full_units": number | null,"has_unknown_partials": boolean | null,"id": string,"kind": string,"location_ids": (string)[] | null,"loose_length_cm": number | null,"loose_mass_dg": number | null,"lot_count": number | null,"low_stock_threshold": number | null,"name": string,"notes": string | null,"owner_id": string,"partial_units": number | null,"pieces": number | null,"product_line": string | null,"quantity_total": number | null,"reserved_total": number | null,"search_text": string,"specs": NonNullable<Json>,"tags": (string)[],"unit_label": string,"unit_length_cm": number | null,"unit_mass_dg": number | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "stash_items_collection_id_fkey"
+      columns: ["collection_id"]
+isOneToOne: false
+      referencedRelation: "stash_collections"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Functions: {
@@ -512,6 +894,24 @@ isOneToOne: false
                            },
 "is_owner":
 { Args: { "owner": string }; Returns: boolean
+                           },
+"stash_change":
+{ Args: { "p_delta": number,"p_holding": string,"p_id": string,"p_kind": string,"p_note"?: string }; Returns: {
+              "r_applied": boolean,"r_quantity": number,"r_reserved": number
+            }[]
+                           },
+"stash_reserve":
+{ Args: { "p_allocation": string,"p_delta": number,"p_id": string }; Returns: {
+              "r_applied": boolean,"r_available": number,"r_reserved": number
+            }[]
+                           },
+"stash_return_leftover":
+{ Args: { "p_allocation": string,"p_amount": number,"p_amount_known"?: boolean,"p_id": string,"p_measure": string,"p_note"?: string }; Returns: string
+                           },
+"stash_use":
+{ Args: { "p_allocation": string,"p_amount": number,"p_id": string,"p_note"?: string }; Returns: {
+              "r_applied": boolean,"r_quantity": number,"r_reserved": number,"r_used": number
+            }[]
                            }
           }
           Enums: {
