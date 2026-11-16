@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FoilStrip } from "@/components/editorial/foil";
 import { Sheet } from "@/components/ui/sheet";
 import { toCoverJpeg, uploadFile } from "@/lib/library/client-files";
 import { validateUpload } from "@/lib/library/constants";
@@ -288,7 +287,6 @@ export function FinishSession({
     >
       <div className="space-y-6">
         <div className="tone-midnight relative isolate overflow-hidden rounded-card bg-midnight text-center">
-          <FoilStrip left="Session complete" right={new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} sizes="32rem" />
           <div className="p-5">
           <div aria-hidden="true" className="absolute -top-12 left-1/2 -z-10 size-48 -translate-x-1/2 rounded-full bg-neon/25 blur-3xl" />
           <p className="text-xs font-semibold tracking-[0.16em] text-white/60 uppercase">This session</p>

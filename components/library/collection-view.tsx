@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { FoilStrip, Numeral } from "@/components/editorial/foil";
+import { Numeral } from "@/components/editorial/foil";
 import { notFound } from "next/navigation";
 import { getCollection, getCrafts, getFolders, folderPath, type Scope } from "@/lib/library/data";
 import { parseLibraryQuery, toSearchParams } from "@/lib/library/query";
@@ -49,8 +49,7 @@ export async function CollectionView({
         </ol>
       </nav>
 
-      <header className="tone-midnight surface-midnight relative isolate mt-3 overflow-hidden rounded-panel">
-        <FoilStrip left={folder ? "Folder" : "Pattern Library"} right={folder ? (folder.parent_id ? "Nested folder" : "Your folder") : "✦ Automatic collection"} />
+      <header className={`tone-midnight surface-midnight relative isolate mt-3 overflow-hidden rounded-panel ${folder ? "" : "holo-border"}`}>
         <div className="flex flex-wrap items-end justify-between gap-4 p-5 sm:p-7">
           <div className="flex min-w-0 items-end gap-4">
             <Numeral n={collection.total} tone="midnight" className="text-[3rem] sm:text-[3.6rem]" />

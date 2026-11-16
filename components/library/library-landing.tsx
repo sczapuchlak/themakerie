@@ -279,14 +279,19 @@ function Stats({ p, dark = false }: { p: ActiveProject; dark?: boolean }) {
 function FeaturedProject({ p }: { p: ActiveProject }) {
   return (
     <article className="tone-midnight relative isolate mt-5 grid overflow-hidden rounded-panel bg-midnight sm:grid-cols-[minmax(0,13rem)_1fr] lg:grid-cols-[minmax(0,15rem)_1fr_auto]" data-testid="featured-project">
-      <FoilStrip className="col-span-full" left="Now making" right={p.progress !== null ? `${p.progress}% complete` : "Just started"} />
       <div aria-hidden="true" className="absolute -top-20 right-1/4 -z-10 size-72 rounded-full bg-cobalt/40 blur-[90px]" />
       <div aria-hidden="true" className="absolute -right-10 -bottom-24 -z-10 size-64 rounded-full bg-pink/25 blur-[90px]" />
       <div className="aspect-[16/10] sm:aspect-auto sm:min-h-[15rem]">
         <CoverArt url={p.coverUrl} title={p.name} craft={p.pattern?.craft} />
       </div>
       <div className="flex min-w-0 flex-col p-6 sm:p-7">
-        {p.pattern && <p className="eyebrow truncate">{p.pattern.title}</p>}
+        <p className="flex min-w-0 items-center gap-2">
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-neon px-2.5 py-1 text-[0.65rem] font-bold tracking-[0.14em] text-midnight uppercase">
+            <span className="size-1.5 rounded-full bg-midnight motion-safe:animate-pulse" aria-hidden="true" />
+            Now making
+          </span>
+          {p.pattern && <span className="eyebrow truncate">{p.pattern.title}</span>}
+        </p>
         <h3 className="mt-2 font-display-tight text-[clamp(1.6rem,3.2vw,2.4rem)] leading-tight text-white [overflow-wrap:anywhere]">{p.name}</h3>
         <div className="mt-4 lg:hidden">
           <Bar value={p.progress} dark />
@@ -304,7 +309,11 @@ function FeaturedProject({ p }: { p: ActiveProject }) {
         </div>
       </div>
       <div className="hidden items-center pr-8 lg:flex">
-        <ProgressRing value={p.progress} size={132} stroke={11} label="complete" tone="dark" />
+        <div className="rounded-full bg-[conic-gradient(from_140deg,#ae8aff,#f477d3,#ffbc91,#b6ff00,#48d7f5,#494af4,#ae8aff)] p-[3px] shadow-[0_0_40px_-8px_rgb(244_119_211/0.6)]">
+          <div className="rounded-full bg-midnight p-2">
+            <ProgressRing value={p.progress} size={128} stroke={11} label="complete" tone="dark" />
+          </div>
+        </div>
       </div>
     </article>
   );

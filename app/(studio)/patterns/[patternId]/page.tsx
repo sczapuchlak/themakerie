@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
-import { FoilStrip, NumberedHeading } from "@/components/editorial/foil";
+import { NumberedHeading } from "@/components/editorial/foil";
 import { CoverArt } from "@/components/library/cover-art";
 import { CoverAura, PaletteStrip } from "@/components/library/cover-palette";
 import { Progress } from "@/components/library/library-landing";
@@ -63,11 +63,7 @@ export default async function PatternPage({ params }: PageProps<"/patterns/[patt
       {/* Hero: cover anchors, title is expressive but contained. */}
       <header className="tone-midnight relative isolate mt-3 overflow-hidden rounded-panel bg-midnight shadow-[0_30px_70px_-34px_rgb(8_22_56/0.65)]">
         <CoverAura src={coverUrl} cacheKey={p.cover_path} className="opacity-80" />
-        <FoilStrip
-          left={`Pattern — ${craft}`}
-          right={[pdfs[0]?.page_count ? plural(pdfs[0].page_count, "page") : null, plural(projects.length, "make")].filter(Boolean).join(" · ")}
-        />
-        <div className="absolute top-[3.6rem] right-4 z-10 flex gap-2">
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
           <FavoriteToggle id={p.id} favorite={p.favorite} variant="icon" />
           <Link
             href={`/patterns/${p.id}/edit`}
